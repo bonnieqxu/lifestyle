@@ -1,0 +1,68 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Tutor Lesson List{% endblock %}
+
+{% block content %}
+
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Tutor Lesson</h1>
+      </div>
+    </div>
+  </section>
+
+  
+  <script>
+    function deleteTutorLesson(lessonID) {
+      var confirmation = confirm("Are you sure you want to delete lesson?");
+      if (confirmation) {
+        // Set the value of hidden input field
+        document.getElementById('lessonID').value = lessonID;
+        // Submit the form
+        document.getElementById('deleteForm').submit();
+      }
+    }
+  </script>
+
+
+<div class="container">
+  <div class="ml-auto d-flex">
+    <a href="{{ url_for('addtutorlesson') }}" class="btn btn-primary" role="button">Add New Lesson</a>
+</div>
+<br>
+    <div class="row">
+      <div class="col-12">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+                <th>Lesson Date</th>
+                <th>Start Time</th>
+                <th>Location</th>
+                <th>Lesson Type</th>
+                <th>Lesson Description</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            {% for tutorlesson in tutorlessonlist %}
+                <tr>
+                    <td>{{ tutorlesson[2].strftime('%d-%m-%Y') if tutorlesson[2] is not none }}</td>
+                    <td>{{ tutorlesson[3] if tutorlesson[3] is not none }}</td>
+                    <td>{{ tutorlesson[4] if tutorlesson[4] is not none }} {{ tutorlesson[5] if tutorlesson[5] is not none }}</td>
+                    <td>{{ tutorlesson[6] if tutorlesson[6] is not none }} </td>
+                    <td>{{ tutorlesson[7] if tutorlesson[7] is not none }} </td>
+                    <td><a href="/edittutorlesson/{{tutorlesson[0]}}">View/Edit</a></td>
+                    <td><a href="#" onclick="deleteTutorLesson('{{tutorlesson[0]}}','{{tutorlesson[1]}}')">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deletetutorlesson" method="POST">
+  <input type="hidden" name="lessonID" id="lessonID">
+</form>
+
+
+{% endblock content%}

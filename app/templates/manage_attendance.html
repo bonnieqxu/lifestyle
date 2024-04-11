@@ -1,0 +1,107 @@
+{% extends 'home_page.html' %}
+{% block title %}Attendance Report{% endblock %}
+{% block content %}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .details {
+        max-width: 150px; /* Adjust the width as needed */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Attendance Report</h1>
+      </div>
+    </div>
+</section>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackattendance') }}" method="post">
+                        <button type="submit" class="btn btn-primary" name="filter" value="lesson">Lesson</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackattendance') }}" method="post">
+                        <button type="submit" class="btn btn-warning" name="filter" value="workshop">Workshop</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackattendance') }}" method="post">
+                        <button type="submit" class="btn btn-success" name="filter" value="all">Clear Filter</button>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                  <table class="table table-striped table-hover">
+                      <tr class="table-primary">
+                        <th>Date</th>
+                        <th>Start Time</th>
+                        <th>Topic</th>
+                        <th class="details">Detail</th>
+                        <th>Location</th>
+                        <th>Capacity Limit</th>
+                        <th>Member Booked</th>
+                        <th>Member Attended</th>
+                        <th>Type</th> 
+                        <th>Mark Attendance</th>          
+                    </tr>
+                </thead>
+                <tbody>               
+                    {% if filter == "lesson" %}
+                        {% for booking in lesson %}
+                            <tr>
+                                <td>{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td>{{ booking[2] if booking[2] is not none }} </td> 
+                                <td>{{ booking[3] if booking[3] is not none }} </td> 
+                                <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
+                                <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 
+                                <td>{{ booking[8] if booking[8] is not none }} </td> 
+                                <td>{{ booking[10] if booking[10] is not none }} </td> 
+                                <td>{{ booking[11] if booking[11] is not none }} </td>  
+                                <td>Lesson </td> 
+                                <td>
+                                    <a href="{{ url_for('viewlessonattendance', lesson_id=booking[0]) }}" class="btn btn-primary">Mark</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for booking in workshop %}
+                            <tr>
+                                <td>{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td>{{ booking[2] if booking[2] is not none }} </td> 
+                                <td>{{ booking[3] if booking[3] is not none }} </td> 
+                                <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
+                                <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 
+                                <td>{{ booking[8] if booking[8] is not none }} </td> 
+                                <td>{{ booking[10] if booking[10] is not none }} </td> 
+                                <td>{{ booking[11] if booking[11] is not none }} </td>  
+                                <td>Workshop </td> 
+                                <td>
+                                    <a href="{{ url_for('viewworkshopattendance', workshop_id=booking[0]) }}" class="btn btn-primary">Mark</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</script>
+{% endblock %}

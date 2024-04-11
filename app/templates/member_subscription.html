@@ -1,0 +1,336 @@
+{% extends 'home_page.html' %}
+
+{% block title %}
+    Manage Member Subscription
+{% endblock %}
+
+{% block content %}
+<div class="container w-50">
+    <form id="cancelMembershipForm" method="POST" action="{{ url_for('member_subscription') }}">
+        <br>
+        <fieldset>
+            <legend class="border-bottom mb-4">Subscription</legend>
+
+            <div class="container">
+                <div class="col-md-12 d-flex justify-content-end"></div>
+                <div>
+                    <div class="form-group row justify-content-between">
+                        <div class="col-auto">
+                            {% if msg %}
+                                <div class="alert alert-success" role="alert">
+                                    {{ msg }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-danger" onclick="cancelMembership()">Cancel Subscription</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <b>{{ form.status.label(class="form-control-label") }}</b>
+                        <span id="status" class="form-control {% if form.expirydate.data > current_date %} text-success {% else %} text-danger {% endif %}">
+                            {% if form.expirydate.data > current_date %}
+                                <b>Active</b>
+                            {% else %}
+                                <b>Expired</b>
+                            {% endif %}
+                        </span>
+                    </div>                   
+                    <div class="form-group row">
+                        <b>{{ form.subscription.label(class="form-control-label") }}</b>
+                        <span id="subscription" class="form-control">
+                            {% if form.subscription.data == 'M' %}
+                                Monthly
+                            {% elif form.subscription.data == 'Y' %}
+                                Yearly
+                            {% else %}
+                                {{ form.subscription.data }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="form-group row">
+                        <b>{{ form.expirydate.label(class="form-control-label") }}</b>
+                        <input id="expirydate" type="text" class="form-control" value="{{ form.expirydate.data.strftime('%d-%m-%Y') }}">
+                    </div>
+                    
+                    <div class="form-group row">
+                        <p><b>Payment History:</b></p>
+                        <a href="#" id="paymentHistoryToggle" onclick="togglePaymentHistory()" style="margin-left: 10px;">View</a>
+                    </div>
+
+                    <div id="paymentHistory" style="display: none;">
+                        <table id="paymentTable" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subscription Plan</th>
+                                    <th>Date Paid</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if payment_data %}
+                                    {% for payment_row in payment_data %}
+                                        <tr>
+                                            <td>
+                                                {% if payment_row[0] == 1 %}
+                                                    Monthly
+                                                {% elif payment_row[0] == 2 %}
+                                                    Yearly
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ payment_row[1].strftime('%d %m %Y') }}</td>
+                                            <td>${{ payment_row[2] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3">No payment history available</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-group row">
+                        <button type="button" class="btn btn-primary mr-2" id="renewMembershipBtn">Renew / Change Plan</button>
+                    </div>
+                    <div class="form-group row" id="renewOptionsContainer" style="display: none;">
+                        <div style="display: flex; ">
+                            <div class="form-group row ml-4">
+                                <p><b>Choose Subscription Plan:</b></p>
+                            </div>
+                            <div class="form-group row ml-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="subscription" id="monthlySubscription" value="Monthly" onchange="toggleRenewOptions()">
+                                    <label class="form-check-label" for="monthlySubscription">
+                                        Monthly ($5/month)
+                                    </label>
+                                </div>
+                                <div class="form-check ml-4">
+                                    <input class="form-check-input" type="radio" name="subscription" id="yearlySubscription" value="Yearly" onchange="toggleRenewOptions()">
+                                    <label class="form-check-label" for="yearlySubscription">
+                                        Annual ($50/year)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>   
+                    
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%">
+                            <div class="form-group row" id="renewByMonthsContainer" style="display: none;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                    <p><b>Enter number of Months:</b></p>
+                                    <input type="text" id="renewMonths" class="form-control" value="1" style="margin-left: 10px; width: 40px;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByMonths()" id="renewByMonthsBtn" style="margin-left: 10px;">Confirm</button>
+                    
+                                    
+                                </div>
+                            </div>
+                            
+                            <div class="form-group row" id="renewByYearsContainer" style="display: none;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                    <p><b>Enter number of Years:</b></p>
+                                    <input type="text" id="renewYears" class="form-control" value="1" style="margin-left: 10px; width: 40px;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByYears()" id="renewByYearsBtn" style="margin-left: 10px;">Confirm</button>
+                                    
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="discountCheckbox" id="discountCheckbox">
+                                <label class="form-check-label" for="discountCheckbox">Please tick the box if you are a student or a pensioner (30% discount applies)</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="text-align: center;">
+                            <label for="amountDue" style="display: block; font-weight: bold;">Amount Due:</label>
+                            <input type="text" class="form-control" id="amountDue" name="amountDue"  style="display: block; width: 50%; margin: 0 auto;" readonly>
+                        </div>
+                        <input type="hidden" name="subscriptionCost" id="subscriptionCost">
+                        <div class="button-container" style="display: flex; justify-content: center;">
+                            <button type="button" class="btn btn-primary" id="payButton" style="margin-right: 10px;">Check out</button>
+                            <button type="button" class="btn btn-danger" id="cancelButton" onclick="refreshPage()">Cancel</button>
+                        </div>        
+                        <br><br>        
+                    </form>
+                    <div id="paymentFormSection" style="display: none; width: 55%; margin: 0 auto;">
+                        <hr>
+                        <h4 style="text-align: center; font-weight: bold;">Payment Details</h4>
+                        <hr>
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number:</label>
+                            <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="Enter card number">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Cardholder Name:</label>
+                            <input type="text" class="form-control" id="cardName" name="cardName" placeholder="Enter cardholder name">
+                            <div id="cardNameError" style="color: red; font-weight: bold; display: none;"></div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="expiryDate">Expiry Date:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <select class="form-control" id="expiryMonth" name="expiryMonth">
+                                            <option value="01">01</option>
+                                            <option value="02">02</option>
+                                            <option value="03">03</option>
+                                            <option value="04">04</option>
+                                            <option value="05">05</option>
+                                            <option value="06">06</option>
+                                            <option value="07">07</option>
+                                            <option value="08">08</option>
+                                            <option value="09">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-control" id="expiryYear" name="expiryYear">
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cards">Cards:</label>
+                                <div class="third-row">
+                                    <div class="selection">
+                                        <div class="cards">
+                                            <img src="{{ url_for('static', filename='mc.png') }}" alt="" style="width: 50px;">
+                                            <img src="{{ url_for('static', filename='vi.png') }}" alt="" style="width: 50px;">
+                                            <img src="{{ url_for('static', filename='pp.png') }}" alt="" style="width: 50px;">
+                                        </div>
+                                    </div>    
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cvv">CVV:</label>
+                                <input type="text" class="form-control" id="cvv" name="cvv" placeholder="Enter CVV">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="confirmPaymentButton">Confirm Payment</button>
+                    </div>
+                    <br>
+                    <div id="errorMsg" style="color: red; font-weight: bold; text-align: center;"></div>
+                    <br><br><br>
+                </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Hidden input to indicate cancel membership action -->
+        <input type="hidden" name="cancel_membership" value="true">
+    </form>
+
+    <script>
+        function cancelMembership() {
+            if (confirm("Are you sure you want to cancel your membership?")) {
+                document.getElementById("cancelMembershipForm").submit();
+            }
+        }
+
+        // Update form fields after cancelling membership
+        function updateFormAfterCancellation() {
+            document.getElementById("status").textContent = "Inactive";
+            document.getElementById("subscription").textContent = "";
+            document.getElementById("expirydate").value = "";
+        }
+
+        // Function to toggle the visibility of payment history table
+        function togglePaymentHistory() {
+            var paymentHistoryDiv = document.getElementById("paymentHistory");
+            var paymentHistoryToggle = document.getElementById("paymentHistoryToggle");
+
+            if (paymentHistoryDiv.style.display === "none") {
+                paymentHistoryDiv.style.display = "block"; // Show the payment history
+                paymentHistoryToggle.textContent = "Close"; // Change the link text to "Close"
+            } else {
+                paymentHistoryDiv.style.display = "none"; // Hide the payment history
+                paymentHistoryToggle.textContent = "View"; // Change the link text to "View"
+            }
+        }
+
+        // Call updateFormAfterCancellation function after form submission
+        document.getElementById("cancelMembershipForm").addEventListener("submit", function() {
+            updateFormAfterCancellation();
+        });
+
+        function toggleRenewOptions() {
+            var monthlyRadio = document.getElementById("monthlySubscription");
+            var yearlyRadio = document.getElementById("yearlySubscription");
+            var renewByMonthsContainer = document.getElementById("renewByMonthsContainer");
+            var renewByYearsContainer = document.getElementById("renewByYearsContainer");
+
+            if (monthlyRadio.checked) {
+                renewByMonthsContainer.style.display = "block";
+                renewByYearsContainer.style.display = "none";
+            } else if (yearlyRadio.checked) {
+                renewByMonthsContainer.style.display = "none";
+                renewByYearsContainer.style.display = "block";
+            }
+        }
+
+        function calculateAmountDue() {
+        var amountDueInput = document.getElementById("amountDue");
+        var subscriptionCostInput = document.getElementById("subscriptionCost");
+        var renewMonthsInput = document.getElementById("renewMonths");
+        var renewYearsInput = document.getElementById("renewYears");
+        var discountCheckbox = document.getElementById("discountCheckbox");
+
+        var renewMonths = parseInt(renewMonthsInput.value);
+        var renewYears = parseInt(renewYearsInput.value);
+
+        var subscriptionCost = 0;
+
+        if (renewYears > 0) {
+            subscriptionCost = renewYears * 50;
+        } else if (renewMonths > 0) {
+            subscriptionCost = renewMonths * 5;
+        }
+
+        if (discountCheckbox.checked) {
+            subscriptionCost *= 0.7; // Apply 30% discount
+        }
+
+        amountDueInput.value = subscriptionCost;
+        subscriptionCostInput.value = subscriptionCost;
+    }
+
+    // Function to handle renewal by months
+    function renewByMonths() {
+        calculateAmountDue();
+    }
+
+    // Function to handle renewal by years
+    function renewByYears() {
+        calculateAmountDue();
+    }
+
+    // Function to refresh the page
+    function refreshPage() {
+        location.reload();
+    }
+
+    // Function to show the "Renew by Months" button
+    function showRenewByMonthsButton() {
+        document.getElementById("renewOptionsContainer").style.display = "block";
+    }
+
+    // Add event listener to the "Renew Membership" button
+    document.getElementById("renewMembershipBtn").addEventListener("click", function() {
+        showRenewByMonthsButton();
+    });
+
+    </script>
+</div>
+{% endblock %}

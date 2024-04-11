@@ -1,0 +1,59 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Workshop List{% endblock %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Workshop List</h1>
+      </div>
+    </div>
+  </section>
+</head>
+
+<div class="container">
+  <br>
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-striped table-hover">
+          <tr class="table-primary">
+                <th>Date</th>
+                <th>Time</th>
+                <th>Topic</th>
+                <th>Tutor</th>                
+                <th>Location</th>    
+                <th>Cost</th>
+                <th>Action</th> <!-- View Details Button -->
+                <th>Reservation</th> <!-- View Details Button -->
+            </tr>
+        </thead>
+        <tbody>
+                {% for workshop in workshops %}
+                <tr>
+                    <td>{{ workshop[5].strftime('%d-%m-%Y') }}</td>
+                    <td>{{ workshop[6] }} </td>
+                    <td>{{ workshop[1] }}</td>
+                    <td>{{ workshop[3] }}</td>
+                    <td>{{ workshop[7] }}{{ workshop[8] }}</td>
+                    <td>{{ workshop[9] }}</td>
+                    <td> <a href="{{ url_for('view_workshop_details', workshop_id=workshop[0]) }}">View Details</a> </td>
+                    <td>
+                      <a href="{{ url_for('bookingpayment_workshop', workshop_id=workshop[0]) }}" class="btn btn-primary">Book Now</a>
+                    </td>
+                </tr>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">No workshops found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Add New Workshop Type{% endblock %}
+
+{% block content %}
+<div class="container w-50">
+    <form method="POST" action="/insertworkshoptype">
+{{form.hidden_tag()}}
+<br>
+<fieldset>
+<legend class="border-botton mb-4"> 
+    Add New Workshop Type
+   </legend>
+
+   <div class="container">
+    <br>
+    <div class="col-md-12 d-flex justify-content-end">
+    </div>
+    <div>
+            <h5 class="text-primary">Workshop Type Information</h5>
+            <div class="form-group row">
+                <b>{{form.workshoptype.label(class="form-control-label")}}</b>
+                {%if form.workshoptype.errors%}
+                {{form.workshoptype(class="form-control is-invalid")}}
+                    {%for error in form.workshoptype.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.workshoptype(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.workshopdesc.label(class="form-control-label")}}</b>
+                {%if form.workshopdesc.errors%}
+                {{form.workshopdesc(class="form-control is-invalid")}}
+                    {%for error in form.workshopdesc.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.workshopdesc(class="form-control")}}
+                {%endif%}
+            </div>
+            
+</fieldset>
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Add Workshop Type</button>
+                    <a href="{{ url_for('viewworkshoptypelist') }}" class="btn btn-primary">Cancel</a>
+                </div>
+                <div class="msg">{{ msg }}</div>
+            </div>
+    </div>
+</div>
+
+
+<input type="hidden" name="action" id="action">
+    </form>
+<br><br>
+
+</div>
+{% endblock %}

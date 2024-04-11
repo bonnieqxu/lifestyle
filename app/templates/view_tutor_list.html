@@ -1,0 +1,57 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Tutor List{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <section class="text-center container">
+        <div class="row py-lg-2">
+            <div class="col-lg-6 col-md-8 mx-auto">
+                <h1 class="fw-light">Tutor List</h1>
+            </div>
+        </div>
+    </section>
+</head>
+
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+
+                <th>Image</th>
+                <th>Title</th>
+                <th>First Name</th>
+                <th>Family Name</th>
+                <th>Profile</th>
+                <th>Action</th>
+                <th>Lessons</th>  <!-- Empty header for the button column -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for tutor in tutor_list %}
+            <tr>
+                <td>
+                {% if tutor[9] is not none %}
+                <img src="{{url_for('static', filename='images/' + tutor[9]) }}" alt="Tutor Image" style="max-width: 100px; max-height: 100px;"> <!-- Tutor Image -->
+                {% endif %}
+                </td>
+                <td>{{ tutor[2] }}</td> <!-- Title -->
+                <td>{{ tutor[3] }}</td> <!-- First Name -->
+                <td>{{ tutor[4] }}</td> <!-- Family Name -->
+                <td>{{ tutor[8] }}</td> <!-- profile -->
+                <td><a href="{{ url_for('view_tutor_details', user_id=tutor[0]) }}" class="btn btn-success">Show Details</a></td>
+                <td><a href="{{ url_for('view_tutor_lessons', user_id=tutor[0]) }}" class="btn btn-primary">Book Now</a> <!-- Add this button -->
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">No tutors found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

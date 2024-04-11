@@ -1,0 +1,242 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Subscription{% endblock %}
+
+{% block content %}
+<script>
+    var MonthlySubFee = "{{ session['MonthlySubFee'] }}";
+    var AnnualSubFee = "{{ session['AnnualSubFee'] }}";
+    var MonthlySubDiscount = "{{ session['MonthlySubDiscount'] }}";
+    var AnnualSubDiscount = "{{ session['AnnualSubDiscount'] }}";
+
+    MonthlySubFee = parseInt(MonthlySubFee);
+    AnnualSubFee = parseInt(AnnualSubFee);
+    MonthlySubDiscount = parseInt(MonthlySubDiscount);
+    AnnualSubDiscount = parseInt(AnnualSubDiscount);
+</script>
+
+<div class="container">
+    <h1 class="text-center">Thank You For Signing Up.</h1>
+    <h4 class="text-center"> Your Request Has Been Successfully Fulfilled</h4>
+    <hr>
+    <h1 class="text-center">Please Choose a Membership Option</h1>
+    <hr>
+    <form id="subscriptionForm" action="{{ url_for('payment') }}" method="post">
+        <div class="container py-5">
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-3">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename='annual.png') }}" alt="Annual Subscription Image" class="card-img-top"> 
+                        <div class="card-body">
+                            <h2 class="card-title">Annual Subscription</h2>
+                            <h5>$50/year</h5>
+                            <input type="radio" id="annualSubscription" name="subscriptionType" value="annual" required>
+                            <label for="annualSubscription">Select</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename='monthly.png') }}" alt="Monthly Payment Image" class="card-img-top"> 
+                        <div class="card-body">
+                            <h2 class="card-title">Monthly Subscription</h2>
+                            <h5>$5/month</h5>
+                            <input type="radio" id="monthlySubscription" name="subscriptionType" value="monthly" required>
+                            <label for="monthlySubscription">Select</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="discountCheckbox" id="discountCheckbox">
+                <label class="form-check-label" for="discountCheckbox">Please tick the box if you are a student or a pensioner (30% discount applies)</label>
+            </div>
+        </div>
+        <div class="form-group" style="text-align: center;">
+            <label for="amountDue" style="display: block; font-weight: bold;">Amount Due:</label>
+            <input type="text" class="form-control" id="amountDue" name="amountDue"  style="display: block; width: 50%; margin: 0 auto;" readonly>
+        </div>
+        <input type="hidden" name="subscriptionCost" id="subscriptionCost">
+        <div class="button-container" style="display: flex; justify-content: center;">
+            <button type="button" class="btn btn-primary" id="payButton" style="margin-right: 10px;">Check out</button>
+            <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+        </div>        
+        <br><br>        
+    </form>
+    <div id="paymentFormSection" style="display: none; width: 55%; margin: 0 auto;">
+        <hr>
+        <h4 style="text-align: center; font-weight: bold;">Payment Details</h4>
+        <hr>
+        <div class="form-group">
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="Enter card number">
+        </div>
+        <div class="form-group">
+            <label for="cardName">Cardholder Name:</label>
+            <input type="text" class="form-control" id="cardName" name="cardName" placeholder="Enter cardholder name">
+            <div id="cardNameError" style="color: red; font-weight: bold; display: none;"></div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="expiryDate">Expiry Date:</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <select class="form-control" id="expiryMonth" name="expiryMonth">
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-control" id="expiryYear" name="expiryYear">
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="cards">Cards:</label>
+                <div class="third-row">
+                    <div class="selection">
+                        <div class="cards">
+                            <img src="{{ url_for('static', filename='mc.png') }}" alt="" style="width: 50px;">
+                            <img src="{{ url_for('static', filename='vi.png') }}" alt="" style="width: 50px;">
+                            <img src="{{ url_for('static', filename='pp.png') }}" alt="" style="width: 50px;">
+                        </div>
+                    </div>    
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="cvv">CVV:</label>
+                <input type="text" class="form-control" id="cvv" name="cvv" placeholder="Enter CVV">
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="confirmPaymentButton">Confirm Payment</button>
+    </div>
+    <br>
+    <div id="errorMsg" style="color: red; font-weight: bold; text-align: center;"></div>
+    <br><br><br>
+</div>
+
+<script>
+// Function to calculate amount due based on subscription type and discount
+    function calculateAmountDue() {
+        var subscriptionType = document.querySelector('input[name="subscriptionType"]:checked').value;
+        console.log(MonthlySubFee);
+        var amountDue = (subscriptionType === 'annual') ? AnnualSubFee : MonthlySubFee; // Default prices for annual and monthly subscriptions
+        // if (document.getElementById('discountCheckbox').checked) {
+        //     amountDue *= 0.7; // Apply 30% discount for students or retirees
+        // }
+        if (document.getElementById('discountCheckbox').checked) {
+            if (subscriptionType === 'annual') {
+                amountDue *= (100 - AnnualSubDiscount) * 0.01; // Apply annual subscription discount
+            } else if (subscriptionType === 'monthly') {
+                amountDue *= (100 - MonthlySubDiscount) * 0.01; // Apply monthly subscription discount
+            }
+        }
+
+        var formattedAmountDue = "$" + amountDue.toFixed(2); 
+        document.getElementById('amountDue').value = formattedAmountDue;
+        document.getElementById('subscriptionCost').value = formattedAmountDue; // Set the hidden input value for subscription cost
+        // document.getElementById('amountDue').value = amountDue.toFixed(2); // without the $ sign
+        // document.getElementById('subscriptionCost').value = amountDue.toFixed(2); // Set the hidden input value for subscription cost
+    }
+
+    // Event listeners for subscription form elements
+    document.querySelectorAll('input[name="subscriptionType"]').forEach(function(radio) {
+        radio.addEventListener('change', calculateAmountDue);
+    });
+    document.getElementById('discountCheckbox').addEventListener('change', calculateAmountDue);
+
+    // Event listener for pay button
+    document.getElementById('payButton').addEventListener('click', function() {
+        var subscriptionType = document.querySelector('input[name="subscriptionType"]:checked');
+        if (!subscriptionType) {
+            // If no subscription type is selected, show error message and return
+            document.getElementById('errorMsg').innerText = 'Please select a subscription type before proceeding to payment';
+            return;
+        } else {
+        // If subscription type is selected, clear any existing error message
+        document.getElementById('errorMsg').innerText = '';
+        }
+        
+        // If subscription type is selected, proceed to show payment form
+        document.getElementById('paymentFormSection').style.display = 'block';
+    });
+
+    // Function to validate cardholder name
+    function validateCardName() {
+        var cardName = document.getElementById('cardName').value.trim();
+        var isValid = /[a-zA-Z]+[\s-]*[a-zA-Z]*/.test(cardName);
+        var errorDiv = document.getElementById('cardNameError');
+        if (!isValid) {
+            errorDiv.textContent = 'Please enter at least one letter. Spaces and hyphens also allowed';
+            return false;
+        } else {
+            errorDiv.textContent = ''; // Clear error message if input is valid
+            return true;
+        }
+    }
+
+
+    // Event listener for confirm payment button
+    document.getElementById('confirmPaymentButton').addEventListener('click', function() {
+        // Validate cardholder name
+        if (!validateCardName()) {
+            // Display error message
+            document.getElementById('errorMsg').innerText = 'Please enter a valid cardholder name';
+            return; // Stop form submission if cardholder name is invalid
+        } else {
+            // Clear any existing error message
+            document.getElementById('errorMsg').innerText = '';
+        }
+        
+        
+        // Validate credit card details
+        var cardNumber = document.getElementById('cardNumber').value;
+        var cardName = document.getElementById('cardName').value;
+        var expiryMonth = document.getElementById('expiryMonth').value; 
+    var expiryYear = document.getElementById('expiryYear').value; 
+        var cvv = document.getElementById('cvv').value;
+        // Validate card number
+        if (cardNumber.length !== 16) {
+            document.getElementById('errorMsg').innerText = 'Please enter a valid 16-digit card number';
+            return;
+        }
+
+        // Validate CVV
+        if (cvv.length !== 3 || isNaN(cvv)) {
+            document.getElementById('errorMsg').innerText = 'Please enter a valid 3-digit CVV (The 3 numbers on the back of your card)';
+            return;
+        }
+        
+        // For now, submit the form
+        document.getElementById('subscriptionForm').submit();
+    });
+
+    // Event listener for cancel button
+    document.getElementById('cancelButton').addEventListener('click', function() {
+        window.location.href = "{{ url_for('landingpage') }}"; // Redirect to landing page
+    });
+
+    // Calculate amount due initially
+    calculateAmountDue();
+
+</script>
+{% endblock %}

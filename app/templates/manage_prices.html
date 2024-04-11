@@ -1,0 +1,85 @@
+{% extends 'home_page.html' %}
+{% block content %}
+
+<div class="container w-50">
+    <form method="POST" action="/updateprices">
+{{form.hidden_tag()}}
+<br>
+<fieldset>
+<legend class="border-botton mb-4"><h1>Subscription Price Maintenance</h1></legend>
+<div class="row">
+    <div class="col">
+        {{form.annualsubfee.label(class="form-control-label")}}
+        {%if form.annualsubfee.errors%}
+        {{form.annualsubfee(class="form-control is-invalid")}}
+            {%for error in form.annualsubfee.errors%}
+                <span>{{error}}</span>
+            {%endfor%}
+            {%else%}
+            {{form.annualsubfee(class="form-control")}}
+        {%endif%}
+    </div>
+    <div class="col">
+        {{form.annualsubdiscount.label(class="form-control-label")}}
+        {%if form.annualsubdiscount.errors%}
+        {{form.annualsubdiscount(class="form-control is-invalid")}}
+            {%for error in form.annualsubdiscount.errors%}
+                <span>{{error}}</span>
+            {%endfor%}
+            {%else%}
+            {{form.annualsubdiscount(class="form-control")}}
+        {%endif%}
+    </div>
+  </div>
+  <div class="row">
+  <div class="col">
+    {{form.monthlysubfee.label(class="form-control-label")}}
+    {%if form.monthlysubfee.errors%}
+    {{form.monthlysubfee(class="form-control is-invalid")}}
+        {%for error in form.monthlysubfee.errors%}
+            <span>{{error}}</span>
+        {%endfor%}
+        {%else%}
+        {{form.monthlysubfee(class="form-control")}}
+    {%endif%}
+</div>
+<div class="col">
+    {{form.monthlysubdiscount.label(class="form-control-label")}}
+    {%if form.monthlysubdiscount.errors%}
+    {{form.monthlysubdiscount(class="form-control is-invalid")}}
+        {%for error in form.monthlysubdiscount.errors%}
+            <span>{{error}}</span>
+        {%endfor%}
+        {%else%}
+        {{form.monthlysubdiscount(class="form-control")}}
+    {%endif%}
+</div>
+</div>
+<br>
+<legend class="border-botton mb-4"><h1>Lesson Price Maintenance</h1></legend>
+<div class="form-group">
+    {{form.lessonfee.label(class="form-control-label")}}
+    {%if form.lessonfee.errors%}
+    {{form.lessonfee(class="form-control is-invalid")}}
+        {%for error in form.lessonfee.errors%}
+            <span>{{error}}</span>
+        {%endfor%}
+        {%else%}
+        {{form.lessonfee(class="form-control")}}
+    {%endif%}
+</div>
+
+    </fieldset>
+<div class="form-group mt-4">
+    {{form.submit(class="btn btn-primary")}}
+</div>
+<input type="hidden" value="{{number_of_records}}" name="number_of_records"/>
+
+<div class="msg" style="color: red;" >{{ msg }}</div>
+
+    </form>
+
+
+</div>
+
+{% endblock content%}

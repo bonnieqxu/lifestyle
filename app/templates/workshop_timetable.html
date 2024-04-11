@@ -1,0 +1,55 @@
+{% block title %}{% endblock %}
+
+{% block content %}
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+
+<body class="loggedin">
+    <nav class="navbar navbar-dark bg-primary d-flex">
+        <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
+        <div class="ml-auto d-flex">
+            <a class="nav-link text-white" href="{{ url_for('authentication') }}">Log in</a>
+            <a class="nav-link text-white" href="{{ url_for('register') }}">Sign Up</a>
+        </div>
+    </nav>
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Workshop Timetable</h1>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="row">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+              <th>Date</th>
+              <th>Time</th>
+              <th>Title</th>
+              <th>Detail</th>
+              <th>Location</th>
+              <th>Tutor</th>
+              <th>Cost</th>
+              <th>Cap Limit</th>
+            </tr>
+            {% for workshop in workshop_timetable %}
+              <tr>
+                <td>{{ workshop[4].strftime('%d-%m-%Y') }}</td>
+                <td>{{ workshop[5] }}</td>               
+                <td>{{ workshop[2] }}</td>
+                <td>{{ workshop[3] }}</td>
+                <td>{{ workshop[6] }}</td>
+                <td>{{ workshop[1] }}</td>
+                <td>${{ workshop[7] }}</td>
+                <td>{{ workshop[8] }}</td>
+              </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</body>
+{% endblock content%}

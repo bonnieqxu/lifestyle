@@ -1,0 +1,34 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Workshop Details{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Workshop Details</h1>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+  <div class="text-center mb-3">
+    <a href="{{ url_for('bookingpayment_workshop', workshop_id=workshop[0]) }}" class="btn btn-primary">Book Now</a>
+</div>
+    <table class="table">
+        <tbody>
+            <tr><th>Topic:</th><td>{{ workshop[1] }}</td></tr>
+            <tr><th>Tutor Name:</th><td>{{ workshop[3] }}</td></tr>
+            <tr><th>Date:</th><td>{{ workshop[5].strftime('%d-%m-%Y') }}</td></tr>
+            <tr><th>Time:</th><td>{{ workshop[6] }}</td></tr>
+            <tr><th>Location:</th><td>{{ workshop[7] }} {{ workshop[8] }}</td></tr>
+            <tr><th>Workshop Detail:</th><td>{{ workshop[4] }}</td></tr>
+            <tr><th>Cost:</th><td>${{ workshop[9] }}</td></tr>
+        </tbody>
+    </table>
+    <!-- Go Back Button -->
+    <div class="text-center">
+    <a href="{{ url_for('view_workshop_list') }}" class="btn btn-secondary">Go Back to Workshop List</a>
+    </div>
+  </div>
+{% endblock %}

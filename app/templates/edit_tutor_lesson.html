@@ -1,0 +1,94 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Edit Lesson{% endblock %}
+
+{% block content %}
+<div class="container w-50">
+    <form method="POST" action="/updatetutorlesson">
+{{form.hidden_tag()}}
+<br>
+<fieldset>
+<legend class="border-botton mb-4"> 
+    Edit Lesson
+   </legend>
+   <div class="container">
+    <br>
+    <div class="col-md-12 d-flex justify-content-end">
+    </div>
+    <div>
+            <h5 class="text-success">Lesson Information</h5>
+            <div class="form-group row">
+                <b>{{form.title.label(class="form-control-label")}}</b>
+                {%if form.title.errors%}
+                {{form.title(class="form-control is-invalid")}}
+                    {%for error in form.title.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.title(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.lessondesc.label(class="form-control-label")}}</b>
+                {%if form.lessondesc.errors%}
+                {{form.lessondesc(class="form-control is-invalid")}}
+                    {%for error in form.lessondesc.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.lessondesc(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.location.label(class="form-control-label")}}</b>
+                {%if form.location.errors%}
+                {{form.location(class="form-control is-invalid")}}
+                    {%for error in form.location.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.location(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.lessondate.label(class="form-control-label")}}</b>
+                {%if form.lessondate.errors%}
+                {{form.lessondate(class="form-control is-invalid")}}
+                    {%for error in form.lessondate.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.lessondate(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.lessonstarttime.label(class="form-control-label")}}</b>
+                {%if form.lessonstarttime.errors%}
+                {{form.lessonstarttime(class="form-control is-invalid")}}
+                    {%for error in form.lessonstarttime.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.lessonstarttime(class="form-control")}}
+                {%endif%}
+            </div>
+           
+</fieldset>
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Edit Lesson</button>
+                    <a href="{{ url_for('viewtutorlessonlist') }}" class="btn btn-primary">Cancel</a>
+                </div>
+                <div class="msg" style="color: red;">{{ msg }}</div>
+            </div>
+    </div>
+</div>
+
+
+<input type="hidden" name="action" id="action">
+<input type="hidden" value="{{lesson_id}}" name="lesson_id"/>
+    </form>
+<br><br>
+
+</div>
+{% endblock %}

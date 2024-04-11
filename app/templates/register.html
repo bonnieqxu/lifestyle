@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
+<body>
+<nav class="navbar navbar-dark bg-primary d-flex">
+    <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
+    <div class="ml-auto d-flex">
+        <a class="nav-link text-white" href="{{ url_for('authentication') }}">Log in</a>
+        <a class="nav-link text-white" href="{{ url_for('register') }}">Sign Up</a>
+    </div>
+</nav>
+<div class="register">
+    <h1 class="text-center">Sign up</h1>
+
+    <form id="RegistrationForm" action="/register" method="post" autocomplete="off" class="mt-4">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            <b>{{ form.username.label }}</b>
+            {{ form.username(class="form-control", required=True) }}
+            {% for error in form.username.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.password.label }}</b>
+            {{ form.password(class="form-control", required=True) }}
+            {% for error in form.password.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+            <small class="form-text text-muted">Password must be at least 8 characters long.</small>
+        </div>
+        <div class="form-group">
+            <b>{{ form.confirm_password.label }}</b>
+            {{ form.confirm_password(class="form-control", required=True) }}
+            {% for error in form.confirm_password.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.title.label }}</b>
+            {{ form.title(class="form-control", required=True) }}
+            {% for error in form.title.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.firstname.label }}</b>
+            {{ form.firstname(class="form-control", required=True) }}
+            {% for error in form.firstname.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.lastname.label }}</b>
+            {{ form.lastname(class="form-control", required=True) }}
+            {% for error in form.lastname.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.phone.label }}</b>
+            {{ form.phone(class="form-control", required=True) }}
+            {% for error in form.phone.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.email.label }}</b>
+            {{ form.email(class="form-control", required=True) }}
+            {% for error in form.email.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.address.label }}</b>
+            {{ form.address(class="form-control") }}
+            {% for error in form.address.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <b>{{ form.dob.label }}</b>
+            {{ form.dob(class="form-control") }}
+            {% for error in form.dob.errors %}
+                <small class="form-text text-danger">{{ error }}</small>
+            {% endfor %}
+            <small class="form-text text-muted">You must be 18 years old or above to register.</small>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Next</button>
+            <button type="button" class="btn btn-secondary btn-block mt-3" onclick="redirectToHome()">Cancel</button>
+        </div>
+    </form>
+    <div class="msg">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {{ msg }}
+    </div>
+</div>
+<script>
+
+
+    function redirectToHome() {
+        window.location.href = "{{ url_for('landingpage') }}";
+    }
+</script>
+</body>
+</html>

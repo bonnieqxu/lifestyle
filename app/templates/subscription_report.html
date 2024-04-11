@@ -1,0 +1,145 @@
+{% extends 'home_page.html' %}
+{% block title %}Subscription Report{% endblock %}
+{% block content %}
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Subscription Report</h1>
+      </div>
+    </div>
+</section>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('subscription_report') }}" method="post">
+                        <button type="submit" class="btn btn-secondary" name="filter" value="expired">Expired Subscriptions Only</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('subscription_report') }}" method="post">
+                        <button type="submit" class="btn btn-warning" name="filter" value="near_to_expire">Near-to-Expire Subscriptions Only</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('subscription_report') }}" method="post">
+                        <button type="submit" class="btn btn-success" name="filter" value="all">Clear Filter</button>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <ul class="list-unstyled">
+                <li class="mb-2"><span style="background-color: lightcoral;">&nbsp;&nbsp;&nbsp;&nbsp;</span> Subscription days left less than 7 days</li>
+                <li class="mb-2"><span style="background-color: pink;">&nbsp;&nbsp;&nbsp;&nbsp;</span> Subscription days left 7-14 days</li>
+                <li class="mb-2"><span style="background-color: lightgoldenrodyellow;">&nbsp;&nbsp;&nbsp;&nbsp;</span> Subscription days left 14-21 days</li>
+                <li class="mb-2"><span style="background-color: lightgray;">&nbsp;&nbsp;&nbsp;&nbsp;</span> Subscription Expired</li>
+                <li class="mb-2"><span style="background-color: whitesmoke;">&nbsp;&nbsp;&nbsp;&nbsp;</span> No Subscription</li>
+            </ul>
+            <table id="subscriptionTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Date of Birth</th>
+                        <th>Position</th>           
+                        <th>Profile</th>
+                        <th>Subscription Type</th>
+                        <th>Expiry Date</th>
+                    </tr>
+                </thead>
+                <tbody>               
+                    {% if filter == "expired" %}
+                        {% for member in expired_members %}
+                            <tr>
+                                <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
+                                <td>{{ member[5] }}</td>
+                                <td>{{ member[6] }}</td>
+                                <td>{{ member[7] }}</td>
+                                <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
+                                <td>{{ member[4] }}</td>     
+                                <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
+                                <td>{{ member[10] }}</td>                        
+                                <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% elif filter == "near_to_expire" %}
+                        {% for member in near_to_expire_members %}
+                            <tr>
+                                <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
+                                <td>{{ member[5] }}</td>
+                                <td>{{ member[6] }}</td>
+                                <td>{{ member[7] }}</td>
+                                <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
+                                <td>{{ member[4] }}</td>     
+                                <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
+                                <td>{{ member[10] }}</td>                        
+                                <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for member in members %}
+                            <tr>
+                                <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
+                                <td>{{ member[5] }}</td>
+                                <td>{{ member[6] }}</td>
+                                <td>{{ member[7] }}</td>
+                                <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
+                                <td>{{ member[4] }}</td>     
+                                <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
+                                <td>{{ member[10] }}</td>                        
+                                <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var table = document.getElementById("subscriptionTable");
+    var tbody = table.getElementsByTagName("tbody")[0];
+    var rows = tbody.getElementsByTagName("tr");
+    
+    for (var i = 0; i < rows.length; i++) {
+        var expiryDateCell = rows[i].getElementsByTagName("td")[8]; // last field
+        var expiryDateString = expiryDateCell.innerText.trim();
+        var parts = expiryDateString.split("-"); // Split dates into year month day
+        var year = parseInt(parts[2]); // Year
+        var monthIndex = parseInt(parts[1]) - 1; // Month
+        var day = parseInt(parts[0]); // Day
+
+        // create dates
+        var expiryDate = new Date(year, monthIndex, day);
+        var currentDate = new Date();
+
+        // calculate days left
+        var daysLeft = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
+
+        console.log("Days left: " + daysLeft);
+
+       // set different background colour
+        if (daysLeft <= 0) {
+            rows[i].style.backgroundColor = "lightgray";
+        } else if (daysLeft <= 7) {
+            rows[i].style.backgroundColor = "lightcoral";
+        } else if (daysLeft <= 14) {
+            rows[i].style.backgroundColor = "pink";
+        } else if (isNaN(daysLeft)) {
+            rows[i].style.backgroundColor = "whitesmoke";
+        } else {
+            rows[i].style.backgroundColor = "lightgoldenrodyellow";
+        }
+
+    }
+});
+
+</script>
+{% endblock %}

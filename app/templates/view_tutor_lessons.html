@@ -1,0 +1,54 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Tutor Lessons{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Tutor Lessons</h1>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row"></div>
+        <div class="col-md-12">
+            {% if lessons %}
+            <div class="table-responsive"> {# Make the table responsive #}
+                <table class="table table-bordered table-striped"> {# Add Bootstrap table classes for better styling #}
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Lesson Type</th> {# Adjust column width #}
+                            <th style="width: 25%;">Lesson Description</th> {# Adjust column width #}
+                            <th style="width: 15%;">Location</th> {# Adjust column width #}
+                            <th style="width: 10%;">Date</th> {# Adjust column width #}
+                            <th style="width: 10%;">Time</th> {# Adjust column width #}
+                            <th style="width: 20%;">Reservation</th> {# Adjust column width #}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in lessons %}
+                        <tr>
+                            <td>{{ lesson[1] }}</td>
+                            <td>{{ lesson[2] }}</td>
+                            <td>{{ lesson[3] }}</td>
+                            <td>{{ lesson[7].strftime('%d-%m-%Y') }}</td>
+                            <td>{{ lesson[8] }}</td>
+                            <td><a href="{{ url_for('view_tutor_one_on_one', lesson_id=lesson[0], tutor_id=lesson[9]) }}" class="btn btn-primary">Book Now</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>No lessons found for this tutor.</p>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Go Back Button -->
+    <div class="text-center">
+        <a href="{{ url_for('view_tutor_list') }}" class="btn btn-secondary">Go Back to Tutor List</a>
+    </div>
+</div>
+{% endblock %}

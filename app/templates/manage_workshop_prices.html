@@ -1,0 +1,58 @@
+{% extends 'home_page.html' %}
+{% block content %}
+
+<div class="container w-80">
+    <form method="POST" action="/updateworkshopprices">
+<br>
+<fieldset>
+        <legend class="border-botton mb-4"><h1>Workshop Price Maintenance</h1></legend>
+        <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <table class="table table-striped table-hover">
+                    <tr class="table-primary">
+                    <th>Topic</th>
+                    <th>Detail</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>   
+                    <th>Tutor</th>   
+                    <th>Cost($)</th>
+                </tr>
+            </thead>
+            <tbody>
+              
+                {% for workshop in workshoplist %}
+
+                {% set workshop_cost_id = 'workshop_cost_' + workshop[0]|string %}
+                <tr>
+                    <td>{{ workshop[2] }}</td> <!-- Topic -->
+                    <td>{{ workshop[3] }}</td> <!-- Topic -->
+                    <td>{{ workshop[4].strftime('%d-%m-%Y') }}</td> <!-- Date -->
+                    <td>{{ workshop[5] }}</td> <!-- Time -->
+                    <td>{{ workshop[6] }}</td> <!-- Location -->
+                    <td>{{ workshop[1] }}</td> <!-- Location -->
+                    <td>
+                        <input type="number" class="form-control col-auto" id="{{ workshop[0] }}"  
+                           name="{{workshop_cost_id}}" value="{{workshop[7]}}"/>
+                    </td> <!-- Cost -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div> 
+</div>
+    </fieldset>
+<div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+</div>
+<input type="hidden" value="{{number_of_records}}" name="number_of_records"/>
+
+<div class="msg" style="color: red;" >{{ msg }}</div>
+
+    </form>
+
+
+</div>
+
+{% endblock content%}

@@ -1,0 +1,66 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Workshop Type List{% endblock %}
+
+{% block content %}
+
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Workshop Type</h1>
+      </div>
+    </div>
+  </section>
+  
+ 
+  <script>
+    function deleteworkshoptype(workshoptypeID, username) {
+      var confirmation = confirm("Are you sure you want to delete Workshop Type " + username + "?");
+      if (confirmation) {
+        // Set the value of hidden input field
+        document.getElementById('workshoptypeID').value = workshoptypeID;
+        // Submit the form
+        document.getElementById('deleteForm').submit();
+      }
+    }
+  </script>
+
+<div class="container">
+  <div class="d-flex justify-content-between">
+    <a href="{{ url_for('addworkshoptype') }}" class="btn btn-primary" role="button">Add New Workshop Type</a>
+    <a href="{{ url_for('workshop_report') }}" class="btn btn-success" role="button">View Workshop Report</a>
+  </div>
+</div>
+
+<br>
+<div class="container">
+    <div class="row">
+      <div class="col-12">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+                <th>Workshop Type</th>
+                <th>Workshop Common Description</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            {% for workshoptype in workshoptype_list %}
+                <tr>
+                    <td>{{workshoptype[1]}} </td>
+                    <td>{{workshoptype[2]}}</td>
+                    <td><a href="/editworkshoptype/{{workshoptype[0]}}">Edit</a></td>
+                    <td><a href="#" onclick="deleteworkshoptype('{{workshoptype[0]}}','{{workshoptype[1]}}')">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deleteworkshoptype" method="POST">
+  <input type="hidden" name="workshoptypeID" id="workshoptypeID">
+</form>
+
+
+{% endblock content%}

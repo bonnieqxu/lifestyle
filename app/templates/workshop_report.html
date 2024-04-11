@@ -1,0 +1,258 @@
+{% extends 'home_page.html' %}
+{% block title %}Workshop Report{% endblock %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Workshop Report</h1>
+      </div>
+    </div>
+  </section>
+<hr>
+<div class="container">
+    <div class="d-flex justify-content-between">
+        <a href="{{ url_for('viewworkshoptypelist') }}" class="btn btn-primary mb-3">Go To Workshop Type List</a>
+        <!-- <a href="#" class="btn btn-success mb-3">View A Bargraph</a> -->
+        <button onclick="openChartModal()" class="btn btn-success mb-3">View A Bargraph</button>      
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <ul class="list-unstyled">
+                <li class="mb-2"><span style="background-color: pink;">&nbsp;&nbsp;&nbsp;&nbsp;</span> Most Popular Workshops</li>
+                <li class="mb-2"><span style="background-color: rgb(181, 224, 181);">&nbsp;&nbsp;&nbsp;&nbsp;</span> Least Popular Workshops</li>
+            </ul>
+
+            <table id="workshopTable" class="table">
+                <thead>
+                    <tr class="table-primary">
+                        <th>Workshop Date</th>
+                        <th>Workshop Time</th>
+                        <th>Workshop Title</th>                        
+                        <th>Workshop Location</th>
+                        <th>Tutor</th>
+                        <th>Workshop Cost</th>
+                        <th>Workshop Cap Limit</th>
+                        <th>Workshop Attendance</th>
+                      </tr>
+                </thead>
+                <tbody>               
+                    {% for workshop in workshops %}               
+                    <tr>
+                        <td>{{ workshop[4].strftime('%d-%m-%Y') }}</td>
+                        <td>{{ workshop[5] }}</td>               
+                        <td>{{ workshop[2] }}</td>                       
+                        <td>{{ workshop[6] }}</td>
+                        <td>{{ workshop[1] }}</td>
+                        <td>${{ workshop[7] }}</td>
+                        <td>{{ workshop[8] }}</td>
+                        <td>{{ workshop[9] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- colour coding the table -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get all workshop rows
+        var workshopRows = document.querySelectorAll("#workshopTable tbody tr");
+
+        // Find the attendance counts of top three workshops
+        var topThreeAttendance = [];
+        for (var i = 0; i < 3; i++) {
+            var attendance = parseInt(workshopRows[i].cells[7].textContent);
+            topThreeAttendance.push(attendance);
+        }
+
+        // Find the attendance counts of bottom three workshops
+        var bottomThreeAttendance = [];
+        var rowCount = workshopRows.length;
+        for (var i = rowCount - 3; i < rowCount; i++) {
+            var attendance = parseInt(workshopRows[i].cells[7].textContent);
+            bottomThreeAttendance.push(attendance);
+        }
+
+        // Mark workshops with top three attendance as pink
+        for (var i = 0; i < workshopRows.length; i++) {
+            var attendance = parseInt(workshopRows[i].cells[7].textContent);
+            if (topThreeAttendance.includes(attendance)) {
+                workshopRows[i].style.backgroundColor = "pink";
+            }
+        }
+
+        // Mark workshops with bottom three attendance as green
+        for (var i = 0; i < workshopRows.length; i++) {
+            var attendance = parseInt(workshopRows[i].cells[7].textContent);
+            if (bottomThreeAttendance.includes(attendance)) {
+                workshopRows[i].style.backgroundColor = "rgb(181, 224, 181)";
+            }
+        }
+    });
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg"> <!-- Use modal-lg class to increase the size of the modal -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chartModalLabel">Workshop Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container"> <!-- bar chart container inside the modal -->
+          <canvas id="barChart" width="800" height="400"></canvas> <!-- Adjust the size of the bar chart container -->
+        </div>
+        <p id="workshopDetails"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- pop up barchart modal -->
+<script>
+  function openChartModal() {
+  $('#chartModal').modal('show');
+}
+
+  // When the page is loaded
+  document.addEventListener("DOMContentLoaded", function () {
+  // Get the workshop titles, attendance data, and details
+  var workshopTitles = {{ workshop_titles|tojson }};
+  var attendanceData = {{ attendance_data|tojson }};
+  var workshopDetails = {{ workshop_details|tojson }};
+
+  // Get the bar chart container
+  var ctx = document.getElementById('barChart').getContext('2d');
+
+  // Generate the bar chart
+  var barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: workshopTitles,
+      datasets: [{
+        label: 'Workshop Attendance',
+        data: attendanceData,
+        backgroundColor: 'blue' // Set the color of the bar chart to blue
+      }]
+    },
+    options: {
+      onClick: function (event, elements) {
+        // Get the index of the X axis element clicked by the user
+        var activePoint = elements[0];
+        if (activePoint) {
+          // Get the index of the workshop clicked by the user
+          var workshopIndex = activePoint.index;
+          // Update the title and details in the modal
+          document.getElementById('chartModalLabel').innerText = workshopTitles[workshopIndex];
+          document.getElementById('workshopDetails').innerText = workshopDetails[workshopIndex];
+          // Show the modal
+          $('#chartModal').modal('show');
+        }
+      },
+    }
+  });
+
+  // When the modal is closed, clear the workshop details
+  $('#chartModal').on('hidden.bs.modal', function () {
+    document.getElementById('workshopDetails').innerText = '';
+  });
+});
+
+</script>
+
+
+
+<!-- <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> 
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="chartModalLabel">Workshop Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container"> 
+            <canvas id="barChart" width="800" height="400"></canvas> 
+          </div>
+          <p id="workshopDetails"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+   -->
+
+
+
+
+
+  <!-- <script>
+    function openChartModal() {
+    $('#chartModal').modal('show');
+}
+
+
+    // 当页面加载完成时执行
+document.addEventListener("DOMContentLoaded", function () {
+  // 获取工作坊标题、出勤数据和详细信息
+  var workshopTitles = {{ workshop_titles|tojson }};
+  var attendanceData = {{ attendance_data|tojson }};
+  var workshopDetails = {{ workshop_details|tojson }};
+
+
+
+  // 获取柱状图容器
+  var ctx = document.getElementById('barChart').getContext('2d');
+
+  // 生成柱状图
+  var barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: workshopTitles,
+      datasets: [{
+        label: 'Workshop Attendance',
+        data: attendanceData,
+        backgroundColor: 'blue' // 设置柱状图颜色为蓝色
+      }]
+    },
+    options: {
+  onClick: function (event, elements) {
+    // 获取用户点击的 X 轴元素索引
+    var activePoint = elements[0];
+    if (activePoint) {
+      // 获取用户点击的工作坊索引
+      var workshopIndex = activePoint.index;
+      // 更新模态框中的标题和详细信息
+      document.getElementById('chartModalLabel').innerText = workshopTitles[workshopIndex];
+      document.getElementById('workshopDetails').innerText = workshopDetails[workshopIndex];
+      // 显示模态框
+      $('#chartModal').modal('show');
+    }
+  }
+}
+  });
+
+  // 当模态框关闭时清空工作坊详细信息
+  $('#chartModal').on('hidden.bs.modal', function () {
+    document.getElementById('workshopDetails').innerText = '';
+  });
+});
+
+
+  </script> -->
+
+
+
+  
+{% endblock %}

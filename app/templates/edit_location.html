@@ -1,0 +1,99 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Edit Location{% endblock %}
+
+{% block content %}
+<div class="container w-50">
+    <form method="POST" action="/updatelocation" enctype="multipart/form-data">
+{{form.hidden_tag()}}
+<br>
+<fieldset>
+<legend class="border-botton mb-4"> 
+    Edit Location
+   </legend>
+
+   <div class="container">
+    <br>
+    <div class="col-md-12 d-flex justify-content-end">
+    </div>
+    <div>
+            <h5 class="text-primary">Location Information</h5>
+            <div class="form-group row">
+                <b>{{form.locationname.label(class="form-control-label")}}</b>
+                {%if form.locationname.errors%}
+                {{form.locationname(class="form-control is-invalid")}}
+                    {%for error in form.locationname.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.locationname(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.locationdesc.label(class="form-control-label")}}</b>
+                {%if form.locationdesc.errors%}
+                {{form.locationdesc(class="form-control is-invalid")}}
+                    {%for error in form.locationdesc.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.locationdesc(class="form-control")}}
+                {%endif%}
+            </div>
+            <div class="form-group row">
+                <b>{{form.locationlimit.label(class="form-control-label")}}</b>
+                {%if form.locationlimit.errors%}
+                {{form.locationlimit(class="form-control is-invalid")}}
+                    {%for error in form.locationlimit.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.locationlimit(class="form-control")}}
+                {%endif%}
+            </div>
+
+            <div class="form-group row">
+               <!-- Image Gallery -->
+            {{ form.locationmap.label }}
+            {{ form.locationmap }}
+            {{ form.locationmap.errors }}
+            </div>
+
+                <!-- Existing Images -->
+            <h5 class="text-primary">Existing Map</h5>
+            <div id="existing-images">
+                <div class="row">
+                    {% for image_filename in form.locationmap.choices %}
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <img src="{{ url_for('static', filename='images/' +image_filename) }}" alt="Image">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"  name="option" value="{{ image_filename }}" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                Delete
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+            <br><br>
+            </div>
+            
+</fieldset>
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Edit Location</button>
+                </div>
+                <div class="msg">{{ msg }}</div>
+            </div>
+    </div>
+</div>
+
+
+<input type="hidden" name="action" id="action">
+<input type="hidden" value="{{location_id}}" name="location_id"/>
+    </form>
+<br><br>
+
+</div>
+{% endblock %}

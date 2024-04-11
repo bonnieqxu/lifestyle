@@ -1,0 +1,187 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Edit Lesson{% endblock %}
+
+{% block content %}
+<div class="container w-50">
+    <form method="POST" action="/updatealesson">
+{{form.hidden_tag()}}
+<br>
+<fieldset>
+<legend class="border-botton mb-4"> Edit A Lesson</legend>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+   $(document).ready(function() {
+       
+
+        var titles = [
+           {% for title in titles_data %}
+           {id: {{ title['id'] }}, type: "{{ title['type'] }}", desc: "{{ title['desc'] }}"}
+           {% if not loop.last %},{% endif %}
+           {% endfor %}
+       ];
+   
+       // Function to populate textarea based on dropdown selection
+       $('#title').change(function() {
+           var selectedId = $(this).val();
+           for (var i = 0; i < titles.length; i++) {
+               if (selectedId == titles[i].id) {
+                   $('#lessondesc').val(titles[i].desc);
+                   break;  // Once found, exit the loop
+               }
+           }
+       });
+       
+        // Trigger change event on page load to populate textarea initially
+        $('#title').change();
+   });
+   </script>
+
+   <div class="container">
+    <br>
+    <div class="col-md-12 d-flex justify-content-end"></div>
+    <div>
+            <h5 class="text-success">Lesson Information</h5>
+            <!-- title -->
+            <div class="form-group row">
+                <b>{{form.title.label(class="form-control-label")}}</b>
+                <br>
+                <select name="title" id="title" class="form-control">
+                    {% for id, title in form.title.choices %}
+                        <option value="{{ id }}" {% if id == form.title.data %} selected {% endif %}>{{ title }}</option>
+                    {% endfor %}
+                </select>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <span class="invalid-feedback">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}               
+            </div>
+            
+            <!-- desc -->
+            <div class="form-group row">
+                <b>{{form.lessondesc.label(class="form-control-label")}}</b>
+                {%if form.lessondesc.errors%}
+                {{form.lessondesc(class="form-control is-invalid")}}
+                    {%for error in form.lessondesc.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                    {%else%}
+                    {{form.lessondesc(class="form-control")}}
+                {%endif%}
+            </div>
+            <!-- location -->
+            <div class="form-group row">
+                <b>{{form.location.label(class="form-control-label")}}</b>                
+                    <select name="location" id="location" class="form-control">
+                        {% for id, location in form.location.choices %}
+                            <option value="{{ id }}" {% if id == form.location.data %} selected {% endif %}>{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.location.errors %}
+                        {% for error in form.location.errors %}
+                            <span class="invalid-feedback">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}                
+            </div>
+            <!-- tutor -->
+            <div class="form-group row">
+                <b>{{form.tutor.label(class="form-control-label")}}</b>
+                
+                    <select name="tutor" id="tutor" class="form-control">
+                        {% for id, tutor in form.tutor.choices %}
+                            <option value="{{ id }}" {% if id == form.tutor.data %} selected {% endif %}>{{ tutor }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.tutor.errors %}
+                        {% for error in form.tutor.errors %}
+                            <span class="invalid-feedback">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}                
+            </div>
+            
+            <!-- date -->
+            <div class="form-group row">
+                <b>{{form.lessondate.label(class="form-control-label")}}</b>
+                {%if form.lessondate.errors%}
+                    {{form.lessondate(class="form-control is-invalid")}}
+                    {%for error in form.lessondate.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                {%else%}
+                    {{form.lessondate(class="form-control", id="lesson_date")}}
+                {%endif%}
+            </div>
+            <div id="dateErrorMessage" style="display: none; color: red;">Please select a date in the future. <br><br></div>
+
+            <!-- time -->
+            <div class="form-group row">
+                <b>{{form.lessonstarttime.label(class="form-control-label")}}</b>
+                {%if form.lessonstarttime.errors%}
+                    {{form.lessonstarttime(class="form-control is-invalid")}}
+                    {%for error in form.lessonstarttime.errors%}
+                        <span>{{error}}</span>
+                    {%endfor%}
+                {%else%}
+                    {{form.lessonstarttime(class="form-control", id="lesson_start_time")}}
+                {%endif%}
+            </div>
+            <div id="timeErrorMessage" style="display: none; color: red;">Please select a time between 8am and 5pm.<br><br></div>
+           
+</fieldset>
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Edit Lesson</button>
+                    <a href="{{ url_for('alltutorlessons') }}" class="btn btn-primary">Cancel</a>
+                </div>
+                <div class="msg" style="color: red;">{{ msg }}</div>
+            </div>
+    </div>
+</div>
+
+
+<input type="hidden" name="action" id="action">
+<input type="hidden" value="{{lesson_id}}" name="lesson_id"/>
+    </form>
+<br><br>
+
+</div>
+
+<script>
+
+    // Function to validate lesson date
+    document.getElementById("lesson_date").addEventListener("change", function() {
+        var selectedDate = new Date(this.value);
+        var currentDate = new Date();
+        if (selectedDate < currentDate) {
+            document.getElementById("dateErrorMessage").style.display = "block";
+            this.value = ""; // Clear the input field
+        } else {
+            document.getElementById("dateErrorMessage").style.display = "none";
+        }
+    });
+    
+    // Function to validate lesson start time
+    document.getElementById("lesson_start_time").addEventListener("change", function() {
+        var selectedTime = this.value;
+        var startTime = new Date();
+        startTime.setUTCHours(8, 0, 0); // Set start time to 8am UTC
+        var endTime = new Date();
+        endTime.setUTCHours(17, 0, 0); // Set end time to 5pm UTC
+    
+        var selectedDateTime = new Date();
+        var timeParts = selectedTime.split(":");
+        selectedDateTime.setUTCHours(parseInt(timeParts[0]), parseInt(timeParts[1]), 0);
+    
+        if (selectedDateTime < startTime || selectedDateTime > endTime) {
+            document.getElementById("timeErrorMessage").style.display = "block";
+            this.value = ""; // Clear the input field
+        } else {
+            document.getElementById("timeErrorMessage").style.display = "none";
+        }
+    });
+    
+</script>
+
+{% endblock %}

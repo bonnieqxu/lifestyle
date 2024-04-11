@@ -1,0 +1,94 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Edit Workshop{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Edit Workshop</h1>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <br>
+    <div class="row justify-content-center"> <!-- Centering the form -->
+        <div class="col-md-6"> <!-- Adjusting the width of the form -->
+            <form method="POST" action="{{ url_for('edit_workshop', workshop_id=workshop[0]) }}">
+                <div class="mb-3">
+                    <label for="workshop_topic" class="form-label">Workshop Topic</label>
+                    <input type="text" class="form-control" id="workshop_topic" name="workshop_topic" value="{{ workshop[1] }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="workshop_detail" class="form-label">Workshop Detail</label>
+                    <textarea class="form-control" id="workshop_detail" name="workshop_detail" required>{{ workshop[4] }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="workshop_date" class="form-label">Workshop Date</label>
+                    <input type="date" class="form-control" id="workshop_date" name="workshop_date" value="{{ workshop[5] }}" required>
+                    <div id="dateErrorMessage" class="text-danger" style="display: none;">Please select a future date.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="workshop_time" class="form-label">Workshop Time</label>
+                    <input type="time" class="form-control" id="workshop_time" name="workshop_time" {% if workshop[6] %} value="{{ workshop[6] }}" {% endif %} required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="workshop_tutor_id" class="form-label">Workshop Tutor</label>
+                    <select class="form-select" id="workshop_tutor_id" name="workshop_tutor_id" required>
+                        {% for tutor in tutors %}
+                            <option value="{{ tutor[0] }}" {% if tutor[0] == workshop[2] %} selected {% endif %}>
+                                {{ tutor[1] }} {{ tutor[2] }}  {{ tutor[3] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="workshop_location" class="form-label">Workshop Location</label>
+                    <select class="form-select" id="workshop_location" name="workshop_location" required>
+                        {% for location in locations %}
+                            <option value="{{ location[0] }}" {% if location[1] == workshop[7] %} selected {% endif %}>
+                                {{ location[1] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="mb-3">
+                    <label for="workshop_cost" class="form-label">Workshop Cost</label>
+                    <input type="number" class="form-control" id="workshop_cost" name="workshop_cost" value="{{ workshop[9] }}" placeholder="{{ workshop[8] }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="workshop_cap_limit" class="form-label">Workshop Capacity Limit</label>
+                    <input type="number" class="form-control" id="workshop_cap_limit" name="workshop_cap_limit" {% if workshop[10] %} value="{{ workshop[10] }}" {% else %} placeholder="Enter Capacity Limit" {% endif %} required>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-10 offset-sm-2">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a href="{{ url_for('manage_workshop_list') }}" class="btn btn-primary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<br>
+<script>
+    document.getElementById("workshop_date").addEventListener("change", function() {
+        var selectedDate = new Date(this.value);
+        var currentDate = new Date();
+        if (selectedDate < currentDate) {
+            document.getElementById("dateErrorMessage").style.display = "block";
+            this.value = ""; // Clear the input field
+        } else {
+            document.getElementById("dateErrorMessage").style.display = "none";
+        }
+    });
+</script>
+
+{% endblock %}

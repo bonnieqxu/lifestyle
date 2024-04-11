@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
+<body>
+<nav class="navbar navbar-dark bg-primary d-flex">
+    <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
+    <div class="ml-auto d-flex">
+        <a class="nav-link text-white" href="{{ url_for('authentication') }}">Log in</a>
+        <a class="nav-link text-white" href="{{ url_for('register') }}">Sign Up</a>
+    </div>
+</nav>
+<div class="authentication">
+    <h1 class="text-center">Log in</h1>
+    <div class="nav nav-pills nav-justified">
+    </div>
+    <form action="{{ url_for('authentication') }}" method="post" class="mt-4">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" class="form-control" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" class="form-control" id="password" required>
+        </div>
+        <div class="msg" style="color: red;">{{ msg }}</div>
+        <button type="submit" class="btn btn-primary btn-block mt-3">Log in</button>
+    </form>
+</div>
+</body>
+</html>

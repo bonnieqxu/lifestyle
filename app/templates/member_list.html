@@ -1,0 +1,70 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Member List{% endblock %}
+
+{% block content %}
+
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Member List</h1>
+      </div>
+    </div>
+  </section>
+  
+  <script>
+    function deleteMember(memberID, username) {
+      var confirmation = confirm("Are you sure you want to delete member with username " + username + "?");
+      if (confirmation) {
+        // Set the value of hidden input field
+        document.getElementById('memberID').value = memberID;
+        // Submit the form
+        document.getElementById('deleteForm').submit();
+      }
+    }
+  </script>
+
+<div class="container">
+    <div class="ml-auto d-flex">
+        <a href="{{ url_for('addmember') }}" class="btn btn-primary" role="button">Add New Member</a>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-12">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+                <th>Member Name</th>
+                <th>Position</th>
+                <th>Phone No.</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>D.O.B.</th>
+                <th>Status</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            {% for member in member_list %}
+                <tr>
+                    <td>{{member[6]}} {{member[7]}} {{member[8]}}</a></td>
+                    <td>{{ member[9] if member[9] is not none }} </td>
+                    <td>{{ member[10] if member[10] is not none }}</td>
+                    <td>{{ member[11] if member[11] is not none }}</td>
+                    <td>{{ member[12] if member[12] is not none }}</td>
+                    <td>{{ (member[13].strftime('%d-%m-%Y')) if member[13] is not none }}</td>
+                    <td>{% if member[4]=='A' %} Active {%else%} Inactive {%endif%}</td>
+                    <td><a href="/editmember/{{member[0]}}">Edit</a></td>
+                    <td><a href="#" onclick="deleteMember('{{member[0]}}','{{member[1]}}')">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deletemember" method="POST">
+  <input type="hidden" name="memberID" id="memberID">
+</form>
+
+
+{% endblock content%}

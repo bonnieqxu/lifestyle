@@ -1,0 +1,55 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Tutor Details{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Tutor Details</h1>
+        </div>
+    </div>
+</section>
+    <!-- Button to show all lessons -->
+    <div class="text-center">
+        <a href="{{ url_for('view_tutor_lessons', user_id=tutor[0]) }}" class="btn btn-primary">Show All Lessons</a>
+    </div>
+<div class="container">
+    <div class="text-center mb-3">
+        <!-- Optional: Add button or action here -->
+        <!-- <a class="btn btn-primary">Action</a> -->
+    </div>
+    <table class="table">
+        <tbody>
+            <td>
+            {% if tutor[9] is not none %}
+            <img src="{{url_for('static', filename='images/' + tutor[9]) }}" alt="Tutor Image" style="max-width: 100px; max-height: 100px;"> <!-- Tutor Image -->
+            {% endif %}
+            </td>
+            <tr><th>Title:</th><td>{{ tutor[2] }}</td></tr>
+            <tr><th>First Name:</th><td>{{ tutor[3] }}</td></tr>
+            <tr><th>Family Name:</th><td>{{ tutor[4] }}</td></tr>
+            <!-- <tr><th>Position:</th><td>{{ tutor[5] }}</td></tr> -->
+            <tr>
+                <th>Position:</th>
+                <td>
+                    {% if tutor[5] is not none %}
+                        {{ tutor[5] }}
+                    {% else %}
+                        ""
+                    {% endif %}
+                </td>
+            </tr>
+            <tr><th>Phone Number:</th><td>{{ tutor[6] }}</td></tr>
+            <tr><th>Email:</th><td>{{ tutor[7] }}</td></tr>
+            <tr><th>Profile:</th><td>{{ tutor[8] }}</td></tr>
+
+        </tbody>
+    </table>
+    <!-- Go Back Button -->
+    <div class="text-center">
+        <a href="{{ url_for('view_tutor_list') }}" class="btn btn-secondary">Go Back to Tutor List</a>
+    </div>
+</div>
+</div>
+{% endblock %}

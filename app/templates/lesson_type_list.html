@@ -1,0 +1,65 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Lesson Type List{% endblock %}
+
+{% block content %}
+
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Lesson Type</h1>
+      </div>
+    </div>
+  </section>
+  
+ 
+  <script>
+    function deletelessontype(lessontypeID, username) {
+      var confirmation = confirm("Are you sure you want to delete Lesson Type " + username + "?");
+      if (confirmation) {
+        // Set the value of hidden input field
+        document.getElementById('lessontypeID').value = lessontypeID;
+        // Submit the form
+        document.getElementById('deleteForm').submit();
+      }
+    }
+  </script>
+
+<div class="container">
+  <div class="d-flex justify-content-between">
+    <a href="{{ url_for('addlessontype') }}" class="btn btn-primary" role="button">Add New Lesson Type</a>
+  </div>
+</div>
+
+<br>
+<div class="container">
+    <div class="row">
+      <div class="col-12">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+                <th>Lesson Type</th>
+                <th>Lesson Common Description</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            {% for lessontype in lessontype_list %}
+                <tr>
+                    <td>{{lessontype[1]}} </td>
+                    <td>{{lessontype[2]}}</td>
+                    <td><a href="/editlessontype/{{lessontype[0]}}">Edit</a></td>
+                    <td><a href="#" onclick="deletelessontype('{{lessontype[0]}}','{{lessontype[1]}}')">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deletelessontype" method="POST">
+  <input type="hidden" name="lessontypeID" id="lessontypeID">
+</form>
+
+
+{% endblock content%}

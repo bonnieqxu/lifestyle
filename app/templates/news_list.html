@@ -1,0 +1,84 @@
+{% extends 'home_page.html' %}
+
+{% block title %}News List{% endblock %}
+
+{% block content %}
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">News List</h1>
+      </div>
+    </div>
+</section>
+
+<script>
+    function deleteNews(newsID) {
+        var confirmation = confirm("Are you sure you want to delete?");
+        if (confirmation) {
+            // Set the value of hidden input field
+            document.getElementById('newsID').value = newsID;
+            // Submit the form
+            document.getElementById('deleteForm').submit();
+        }
+    }
+</script>
+
+<div class="container">
+    {% if session.userrole == 'MG' %}
+    <div class="ml-auto d-flex">
+        <a href="{{ url_for('addnews') }}" class="btn btn-primary" role="button">Add News</a>
+    </div>
+    {% endif %}
+    <br>
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Image</th>
+                        <th>Date Added</th>
+                        {% if session.userrole == 'MG' %}
+                        <th>Edit</th>
+                        <th>Delete</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for news in news_list %}
+                    <tr>
+                        <td>{{ news[1] }}</td>
+                        <td>{{ news[2] }}</td>
+                        <td>
+                            {% if news[3] %}
+                            <img src="{{ url_for('static', filename='images/' + news[3]) }}" class="img-thumbnail" alt="Image" width="240" height="240">
+                            {% else %}
+                            <div>No image available</div>
+                            {% endif %}
+                        </td>
+                        {% if news[4] %}
+                        <td>{{ news[4].strftime('%d %m %Y %I:%M %p') }}</td>
+                        {% else %}
+                        <td>No date available</td>
+                        {% endif %}
+                        {% if session.userrole == 'MG' %}
+                        <td><a href="/editnews/{{ news[0] }}">Edit</a></td>
+                        <td><a href="#" onclick="deleteNews('{{ news[0] }}')">Delete</a></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+                
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deletenews" method="POST">
+  <input type="hidden" name="newsID" id="newsID">
+</form>
+
+{% endblock %}

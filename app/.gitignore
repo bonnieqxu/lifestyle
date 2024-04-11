@@ -1,0 +1,29 @@
+# Python-related files
+*.pyc
+__pycache__/
+
+# Environment-related files
+env/
+venv/
+
+# IDE-related files
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Configuration files
+instance/
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Dependency directories
+lib/
+libs/
+
+connect.py
+

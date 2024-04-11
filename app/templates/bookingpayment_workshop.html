@@ -1,0 +1,140 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Workshop Booking{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Workshop Booking and Payment</h1>
+        </div>
+    </div>
+    <form id="paymentConfirmationForm" action="{{ url_for('bookingpayment_workshop', workshop_id=workshop_id) }}" method="post">
+        <div id="paymentFormSection" style="width: 55%; margin: 0 auto;">
+
+            <h4 style="text-align: center; font-weight: bold;">Payment Details</h4>
+
+            <div class="form-group" style="text-align: center;">
+                <label for="amountDue" style="display: block; font-weight: bold;">Total Amount Due:</label>
+                <!-- Adjust value dynamically based on workshop cost -->
+                <input type="text" class="form-control" id="amountDue" name="amountDue" value="{{ workshop_cost }}" style="display: block; width: 50%; margin: 0 auto;" readonly>
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">Card Number:</label>
+                <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="Enter card number">
+            </div>
+            <div class="form-group">
+                <label for="cardName">Cardholder Name:</label>
+                <input type="text" class="form-control" id="cardName" name="cardName" placeholder="Enter cardholder name">
+                <div id="cardNameError" style="color: red; font-weight: bold; display: none;"></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="expiryDate">Expiry Date:</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select class="form-control" id="expiryMonth" name="expiryMonth">
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" id="expiryYear" name="expiryYear">
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="cards">Cards:</label>
+                    <div class="third-row">
+                        <div class="selection">
+                            <div class="cards">
+                                <img src="{{ url_for('static', filename='mc.png') }}" alt="" style="width: 50px;">
+                                <img src="{{ url_for('static', filename='vi.png') }}" alt="" style="width: 50px;">
+                                <img src="{{ url_for('static', filename='pp.png') }}" alt="" style="width: 50px;">
+                            </div>
+                        </div>    
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="cvv">CVV:</label>
+                    <input type="text" class="form-control" id="cvv" name="cvv" placeholder="Enter CVV">
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="confirmPaymentButton">Confirm Payment</button>
+            <a href="{{ url_for('view_workshop_list') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+        <div id="errorMsg" style="color: red; font-weight: bold; text-align: center;">
+        </div>
+    </form>
+
+</section>
+        
+<script>
+    document.getElementById('confirmPaymentButton').addEventListener('click', function() {
+        // Validate cardholder name
+        if (!validateCardName()) {
+            // Display error message
+            document.getElementById('errorMsg').innerText = 'Please enter a valid cardholder name.';
+            return; // Stop form submission if cardholder name is invalid
+        }
+
+        // Validate credit card details
+        var cardNumber = document.getElementById('cardNumber').value;
+        var expiryMonth = document.getElementById('expiryMonth').value;
+        var expiryYear = document.getElementById('expiryYear').value;
+        var cvv = document.getElementById('cvv').value;
+
+        // Validate card number
+        if (cardNumber.length !== 16) {
+            document.getElementById('errorMsg').innerText = 'Please enter a valid 16-digit card number.';
+            return;
+        }
+
+        // Validate CVV
+        if (cvv.length !== 3 || isNaN(cvv)) {
+            document.getElementById('errorMsg').innerText = 'Please enter a valid 3-digit CVV. (The 3 numbers on the back of your card)';
+            return;
+        }
+
+        // Validate expiry date
+        var currentDate = new Date();
+        var selectedExpiryDate = new Date(expiryYear, expiryMonth - 1); // Note: Months are zero-based in JavaScript Date objects
+        if (selectedExpiryDate < currentDate) {
+            document.getElementById('errorMsg').innerText = 'Your credit or debit card has expired. Please enter a valid expiry date for this card or use another card. ';
+            return;
+        }
+
+        // After showing the message, you may want to submit the payment confirmation form
+        document.getElementById('paymentConfirmationForm').submit();
+    });
+
+    // Sample function for cardholder name validation
+    function validateCardName() {
+        var cardName = document.getElementById('cardName').value;
+        // Check if the card name is empty or contains only numbers
+        if (cardName.trim() === '' || !isNaN(cardName.trim())) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+
+{% endblock %}

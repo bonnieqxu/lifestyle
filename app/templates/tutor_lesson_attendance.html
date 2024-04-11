@@ -1,0 +1,65 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Tutor Lesson Attendance Check{% endblock %}
+
+{% block content %}
+
+<script>
+    function markAttendance(bookingID, lessontype, lessonID) {
+      var confirmation = confirm("Are you sure you want to mark attendance for lesson " + lessontype + "?");
+      if (confirmation) {
+        // Set the value of hidden input field
+        document.getElementById('bookingID').value = bookingID;
+        document.getElementById('lessonID').value = lessonID;
+        // Submit the form
+        document.getElementById('updateForm').submit();
+      }
+    }
+  </script>
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Tutor Lesson Attendance Check</h1>
+      </div>
+    </div>
+  </section>
+
+<div class="container">
+<br>
+    <div class="row">
+      <div class="col-12">
+        <table class="table table-striped table-hover">
+            <tr class="table-primary">
+                <th>Lesson Date</th>
+                <th>Start Time</th>
+                <th>Member Name</th>
+                <th>Location</th>
+                <th>Lesson Type</th>
+                <th>Lesson Description</th>
+                <th>Attendance Check</th>
+            </tr>
+            {% for tutorlessonbooking in tutorlessonbookinglist %}
+                <tr>
+                    <td>{{ tutorlessonbooking[1].strftime('%d-%m-%Y')  if tutorlessonbooking[1] is not none }}</td>
+                    <td>{{ tutorlessonbooking[2] if tutorlessonbooking[2] is not none }}</td>
+                    <td>{{ tutorlessonbooking[3]}} {{tutorlessonbooking[4]}}  {{tutorlessonbooking[5] }}</td>
+                    <td>{{ tutorlessonbooking[6] if tutorlessonbooking[6] is not none }} </td>
+                    <td>{{ tutorlessonbooking[7] if tutorlessonbooking[7] is not none }} </td>
+                    <td>{{ tutorlessonbooking[8] if tutorlessonbooking[8] is not none }} </td>
+                        <td>
+                        <a href="#" onclick="markAttendance('{{tutorlessonbooking[0]}}','{{tutorlessonbooking[7]}}','{{tutorlessonbooking[9]}}')" class="btn btn-primary">Mark</a>
+                        </td>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="updateForm" action="/updatelessonattendance" method="POST">
+    <input type="hidden" name="bookingID" id="bookingID">
+    <input type="hidden" name="lessonID" id="lessonID">
+</form>
+
+
+{% endblock content%}

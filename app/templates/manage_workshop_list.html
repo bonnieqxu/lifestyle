@@ -1,0 +1,69 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Manage Workshop List{% endblock %}
+
+{% block content %}
+<section class="text-center container">
+    <div class="row py-lg-2">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Manage Workshop Schedule</h1>
+        </div>
+    </div>
+</section>
+
+<script>
+    function deleteWorkshop(workshopID) {
+        var confirmation = confirm("Are you sure you want to delete this workshop?");
+        if (confirmation) {
+            // Set the value of hidden input field
+            document.getElementById('workshopID').value = workshopID;
+            // Submit the form
+            document.getElementById('deleteForm').submit();
+        }
+    }
+</script>
+
+<div class="container">
+    <div class="ml-auto d-flex">
+        <a href="{{ url_for('add_workshop') }}" class="btn btn-primary" role="button">Add New Workshop</a>
+        <a href="{{ url_for('manage_weekly_workshop_list') }}" class="btn btn-secondary ml-2">Show Next 7 Days</a> <!-- Corrected anchor tag -->
+
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-12">
+            <table id="workshopTable" class="table table-striped table-hover">
+                <tr class="table-primary">
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Topic</th>
+                    <th>Tutor</th>                
+                    <th>Location</th>    
+                    <th>Cost</th>
+                    <th>Capacity</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+                {% for workshop in workshop_list %}
+                    <tr>
+                        <td>{{ workshop[5].strftime('%d-%m-%Y') }}</td>
+                        <td>{{ workshop[6] }}</td>
+                        <td>{{ workshop[1] }}</td>
+                        <td>{{ workshop[3] }}</td>
+                        <td>{{ workshop[7] }}</td>
+                        <td>${{workshop[9] }}</td>
+                        <td>{{ workshop[10] }}</td>
+                        <td><a href="/editworkshop/{{ workshop[0] }}">View/Edit</a></td>
+                        <td><a href="#" onclick="deleteWorkshop('{{ workshop[0] }}')">Delete</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Hidden form for deletion -->
+<form id="deleteForm" action="/deleteworkshop" method="POST">
+    <input type="hidden" name="workshopID" id="workshopID">
+</form>
+
+{% endblock content %}

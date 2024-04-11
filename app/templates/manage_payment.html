@@ -1,0 +1,120 @@
+{% extends 'home_page.html' %}
+{% block title %}Payment Report{% endblock %}
+{% block content %}
+
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Payment Report</h1>
+      </div>
+    </div>
+</section>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackpayment') }}" method="post">
+                        <button type="submit" class="btn btn-primary" name="filter" value="lesson">Lesson</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackpayment') }}" method="post">
+                        <button type="submit" class="btn btn-warning" name="filter" value="workshop">Workshop</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackpayment') }}" method="post">
+                        <button type="submit" class="btn btn-danger" name="filter" value="subscription">Subscription</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('trackpayment') }}" method="post">
+                        <button type="submit" class="btn btn-success" name="filter" value="all">Clear Filter</button>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                  <table class="table table-striped table-hover">
+                      <tr class="table-primary">
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Payment For</th>
+                        <th>Member Name</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Date of Birth</th>
+                        <th>Position</th>           
+                    </tr>
+                </thead>
+                <tbody>               
+                    {% if filter == "lesson" %}
+                        {% for pay in lesson %}
+                            <tr>
+                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td>${{ pay[1] }}</td>
+                                <td>{{ pay[2] if pay[2] is not none }} </td> 
+                                <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
+                                <td>{{ pay[6] if pay[6] is not none }} </td> 
+                                <td>{{ pay[7] if pay[7] is not none }} </td> 
+                                <td>{{ pay[8] if pay[8] is not none }} </td> 
+                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td>{{ pay[10] if pay[10] is not none }} </td> 
+                            </tr>
+                        {% endfor %}
+                    {% elif filter == "workshop" %}
+                        {% for pay in workshop %}
+                            <tr>
+                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td>${{ pay[1] }}</td>
+                                <td>{{ pay[2] if pay[2] is not none }} </td> 
+                                <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
+                                <td>{{ pay[6] if pay[6] is not none }} </td> 
+                                <td>{{ pay[7] if pay[7] is not none }} </td> 
+                                <td>{{ pay[8] if pay[8] is not none }} </td> 
+                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td>{{ pay[10] if pay[10] is not none }} </td> 
+                            </tr>
+                        {% endfor %}
+                        {% elif filter == "subscription" %}
+                        {% for pay in subscription %}
+                            <tr>
+                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td>${{ pay[1] }}</td>
+                                <td>{{ pay[2] if pay[2] is not none }} </td> 
+                                <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
+                                <td>{{ pay[6] if pay[6] is not none }} </td> 
+                                <td>{{ pay[7] if pay[7] is not none }} </td> 
+                                <td>{{ pay[8] if pay[8] is not none }} </td> 
+                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td>{{ pay[10] if pay[10] is not none }} </td>  
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for pay in payment %}
+                            <tr>
+                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td>${{ pay[1] }}</td>
+                                <td>{{ pay[2] if pay[2] is not none }} </td> 
+                                <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
+                                <td>{{ pay[6] if pay[6] is not none }} </td> 
+                                <td>{{ pay[7] if pay[7] is not none }} </td> 
+                                <td>{{ pay[8] if pay[8] is not none }} </td> 
+                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td>{{ pay[10] if pay[10] is not none }} </td>   
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</script>
+{% endblock %}

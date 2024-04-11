@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
+
+<body class="bg-image" style="background-image: url('/static/background2.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-color: rgba(200, 200, 200, 0.1);">
+    <nav class="navbar navbar-dark bg-primary d-flex">
+        <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
+        <div class="ml-auto d-flex">
+            <a class="nav-link text-white" href="{{ url_for('authentication') }}">Log in</a>
+            <a class="nav-link text-white" href="{{ url_for('register') }}">Sign Up</a>
+        </div>
+    </nav>
+    <div class="container w-50">
+        {% with messages=get_flashed_messages(with_categories=true) %}
+          {%if messages%}
+            {%for category, message in messages%}
+            <div class="alert alert-{{category}}">
+                {{ message }}
+            </div>
+            {% endfor %}
+          {%endif%}
+        {%endwith%}
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- <div class="col-md-3">
+                <img src="/static/landing2.jpg" class="img-fluid" alt="Image" style="max-width: 50%;">
+            </div> -->
+            <div class="col-md-6">
+                <div class="container mt-5">
+                    <h1 class="text-center">Hello and welcome!</h1>
+                    <br>
+                    <h4 class="text-center">Thank you for using</h4>
+                    <h4 class="text-center">Lifestyle Landholders Club Management System</h4>
+                    <div class="text-center">
+                        <br><br>
+                        <a href="/authentication" class="btn btn-primary mr-2">Log in</a>
+                        <a href="/register" class="btn btn-primary mr-2">Sign up</a>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-md-3">
+                <img src="/static/landing3.jpg" class="img-fluid" alt="Image" style="max-width: 50%;">
+            </div> -->
+        </div>
+    </div>
+
+
+    <!-- 3 cards to display more info -->
+
+    <div class="p-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg">
+                    <div class="card shadow-lg">
+                        <img src="{{ url_for('static', filename='lifestyle.jpg') }}" alt="" class="card-img-top">                        
+                        <div class="card-body"> 
+                            <h3 class="card-title">Lifestyle Farming</h3>
+                            <p class="card-text">Find information about lifestyle farming.</p>                            
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg">
+                    <div class="card shadow-lg">
+                        <a href="/view_workshop">
+                            <img src="{{ url_for('static', filename='schedule.jpg') }}" alt="" class="card-img-top">
+                        </a>
+                        <div class="card-body"> 
+                            <h3 class="card-title">Workshop Schedule</h3>
+                            <p class="card-text">View our workshop schedule here.</p>     
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg">
+                    <div class="card shadow-lg">
+                        <a href="/view_tutor_list_for_visitor">
+                            <img src="{{ url_for('static', filename='tutor.jpg') }}" alt="" class="card-img-top">
+                        </a>
+                        <div class="card-body"> 
+                            <h3 class="card-title">Our Tutors</h3>
+                            <p class="card-text">Check out our friendly tutors here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- footer -->
+
+    <footer class="p-4 border-top">
+        <div class="container align-items-center justify-content-between d-flex">
+            <img src="static/logo.png" alt="Group N Lifestyle Logo" style="width: 5%;">
+            <p class="mb-0 text-muted">
+                Group N Lifestyle
+            </p>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-muted">Michael Ang</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-muted">Alex Chang</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-muted">Melody Ma</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-muted">Bonnie Xu</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+
+    
+    
+    <!-- Bootstrap's JavaScript bundle including Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (() => {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+
+</body>
+</html>
