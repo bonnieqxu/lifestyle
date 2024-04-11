@@ -22,9 +22,7 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="col-auto">
-                            <button type="button" class="btn btn-danger" onclick="cancelMembership()">Cancel Subscription</button>
-                        </div>
+                    
                     </div>
                     
                     <div class="form-group row">
@@ -76,7 +74,7 @@
                                                 {% if payment_row[0] == 1 %}
                                                     Monthly
                                                 {% elif payment_row[0] == 2 %}
-                                                    Yearly
+                                                    Annual
                                                 {% else %}
                                                     Unknown
                                                 {% endif %}
@@ -117,41 +115,36 @@
                                 </div>
                             </div>
                         </div>   
-                    
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%">
-                            <div class="form-group row" id="renewByMonthsContainer" style="display: none;">
-                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                                    <p><b>Enter number of Months:</b></p>
-                                    <input type="text" id="renewMonths" class="form-control" value="1" style="margin-left: 10px; width: 40px;">
-                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByMonths()" id="renewByMonthsBtn" style="margin-left: 10px;">Confirm</button>
-                    
-                                    
-                                </div>
-                            </div>
-                            
-                            <div class="form-group row" id="renewByYearsContainer" style="display: none;">
-                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                                    <p><b>Enter number of Years:</b></p>
-                                    <input type="text" id="renewYears" class="form-control" value="1" style="margin-left: 10px; width: 40px;">
-                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByYears()" id="renewByYearsBtn" style="margin-left: 10px;">Confirm</button>
-                                    
-                                    
-                                </div>
-                            </div>
-                        </div>
                         <div class="form-group" style="display: flex; justify-content: center; align-items: center; width: 100%;">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" name="discountCheckbox" id="discountCheckbox">
                                 <label class="form-check-label" for="discountCheckbox">Please tick the box if you are a student or a pensioner (30% discount applies)</label>
                             </div>
                         </div>
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%">
+                            <div class="form-group row" id="renewByMonthsContainer" style="display: none;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                    <h4>Enter number of Months:</h4>
+                                    <input type="text" id="renewMonths" class="form-control" value="" style="margin-left: 10px; width: 60px;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByMonths()" id="renewByMonthsBtn" style="margin-left: 10px;">Confirm</button>
+                                </div>
+                            </div>
+                            <div class="form-group row" id="renewByYearsContainer" style="display: none;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                    <h4>Enter number of Years:</h4>
+                                    <input type="text" id="renewYears" class="form-control" value="" style="margin-left: 10px; width: 60px;">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="renewByYears()" id="renewByYearsBtn" style="margin-left: 10px;">Confirm</button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group" style="text-align: center;">
                             <label for="amountDue" style="display: block; font-weight: bold;">Amount Due:</label>
                             <input type="text" class="form-control" id="amountDue" name="amountDue"  style="display: block; width: 50%; margin: 0 auto;" readonly>
                         </div>
                         <input type="hidden" name="subscriptionCost" id="subscriptionCost">
                         <div class="button-container" style="display: flex; justify-content: center;">
-                            <button type="button" class="btn btn-primary" id="payButton" style="margin-right: 10px;">Check out</button>
+                            <button type="button" class="btn btn-success" id="payButton" style="margin-right: 10px;">Proceed</button>
                             <button type="button" class="btn btn-danger" id="cancelButton" onclick="refreshPage()">Cancel</button>
                         </div>        
                         <br><br>        
@@ -260,51 +253,58 @@
             }
         }
 
-        // Call updateFormAfterCancellation function after form submission
-        document.getElementById("cancelMembershipForm").addEventListener("submit", function() {
-            updateFormAfterCancellation();
-        });
-
-        function toggleRenewOptions() {
-            var monthlyRadio = document.getElementById("monthlySubscription");
-            var yearlyRadio = document.getElementById("yearlySubscription");
-            var renewByMonthsContainer = document.getElementById("renewByMonthsContainer");
-            var renewByYearsContainer = document.getElementById("renewByYearsContainer");
-
-            if (monthlyRadio.checked) {
-                renewByMonthsContainer.style.display = "block";
-                renewByYearsContainer.style.display = "none";
-            } else if (yearlyRadio.checked) {
-                renewByMonthsContainer.style.display = "none";
-                renewByYearsContainer.style.display = "block";
-            }
-        }
-
-        function calculateAmountDue() {
-        var amountDueInput = document.getElementById("amountDue");
-        var subscriptionCostInput = document.getElementById("subscriptionCost");
+       // Function to toggle the visibility of payment history table
+       function toggleRenewOptions() {
+        var monthlyRadio = document.getElementById("monthlySubscription");
+        var yearlyRadio = document.getElementById("yearlySubscription");
+        var renewByMonthsContainer = document.getElementById("renewByMonthsContainer");
+        var renewByYearsContainer = document.getElementById("renewByYearsContainer");
         var renewMonthsInput = document.getElementById("renewMonths");
         var renewYearsInput = document.getElementById("renewYears");
-        var discountCheckbox = document.getElementById("discountCheckbox");
 
-        var renewMonths = parseInt(renewMonthsInput.value);
-        var renewYears = parseInt(renewYearsInput.value);
-
-        var subscriptionCost = 0;
-
-        if (renewYears > 0) {
-            subscriptionCost = renewYears * 50;
-        } else if (renewMonths > 0) {
-            subscriptionCost = renewMonths * 5;
+        if (monthlyRadio.checked) {
+            renewByMonthsContainer.style.display = "block";
+            renewByYearsContainer.style.display = "none";
+            renewYearsInput.value = ""; // Clear the value of renewYearsInput
+            calculateAmountDue(); // Call calculateAmountDue() when monthly subscription is selected
+        } else if (yearlyRadio.checked) {
+            renewByMonthsContainer.style.display = "none";
+            renewByYearsContainer.style.display = "block";
+            renewMonthsInput.value = ""; // Clear the value of renewMonthsInput
+            calculateAmountDue(); // Call calculateAmountDue() when yearly subscription is selected
         }
-
-        if (discountCheckbox.checked) {
-            subscriptionCost *= 0.7; // Apply 30% discount
-        }
-
-        amountDueInput.value = subscriptionCost;
-        subscriptionCostInput.value = subscriptionCost;
     }
+
+    function calculateAmountDue() {
+    var amountDueInput = document.getElementById("amountDue");
+    var subscriptionCostInput = document.getElementById("subscriptionCost");
+    var renewMonthsInput = document.getElementById("renewMonths");
+    var renewYearsInput = document.getElementById("renewYears");
+    var discountCheckbox = document.getElementById("discountCheckbox");
+
+    var renewMonths = parseInt(renewMonthsInput.value);
+    var renewYears = parseInt(renewYearsInput.value);
+
+    var subscriptionCost = 0;
+
+    if (renewMonths >= 1) { // Modify condition to include 0 as a valid input
+        subscriptionCost += renewMonths * 5;
+        if (discountCheckbox.checked) {
+            subscriptionCost *= 0.7; // Apply 30% discount for monthly subscription
+        }
+    } else if (renewYears >= 1) { // Modify condition to include 0 as a valid input
+        subscriptionCost += renewYears * 50;
+        if (discountCheckbox.checked) {
+            subscriptionCost *= 0.7; // Apply 30% discount for yearly subscription
+        }
+    } else if (renewMonths === 0 || renewYears === 0) { // Check if both renewMonths and renewYears are 0
+        alert("Please enter a valid number");
+    }
+
+    amountDueInput.value = "$" + subscriptionCost;
+    subscriptionCostInput.value = subscriptionCost;
+}
+
 
     // Function to handle renewal by months
     function renewByMonths() {
@@ -330,6 +330,74 @@
     document.getElementById("renewMembershipBtn").addEventListener("click", function() {
         showRenewByMonthsButton();
     });
+
+    // Event listeners for subscription form elements
+document.querySelectorAll('input[name="subscription"]').forEach(function(radio) {
+    radio.addEventListener('change', calculateAmountDue);
+});
+
+// Event listener for pay button
+document.getElementById('payButton').addEventListener('click', function() {
+    var subscriptionType = document.querySelector('input[name="subscription"]:checked');
+    if (!subscriptionType) {
+        // If no subscription type is selected, show error message and return
+        document.getElementById('errorMsg').innerText = 'Please select a subscription type before proceeding to payment';
+        return;
+    } else {
+        // If subscription type is selected, clear any existing error message
+        document.getElementById('errorMsg').innerText = '';
+    }
+    
+    // If subscription type is selected, proceed to show payment form
+    document.getElementById('paymentFormSection').style.display = 'block';
+});
+
+    // Function to validate cardholder name
+    function validateCardName() {
+        var cardName = document.getElementById('cardName').value.trim();
+        var isValid = /[a-zA-Z]+[\s-]*[a-zA-Z]*/.test(cardName);
+        var errorDiv = document.getElementById('cardNameError');
+        if (!isValid) {
+            errorDiv.textContent = 'Please enter at least one letter. Spaces and hyphens also allowed';
+            return false;
+        } else {
+            errorDiv.textContent = ''; // Clear error message if input is valid
+            return true;
+        }
+    }
+
+    // Event listener for confirm payment button
+    document.getElementById('confirmPaymentButton').addEventListener('click', function() {
+        // Validate cardholder name
+        if (!validateCardName()) {
+            // Display error message
+            document.getElementById('errorMsg').innerText = 'Please enter a valid cardholder name';
+            return; // Stop form submission if cardholder name is invalid
+        } else {
+            // Clear any existing error message
+            document.getElementById('errorMsg').innerText = '';
+        }
+        
+        
+    // Validate credit card details
+    var cardNumber = document.getElementById('cardNumber').value;
+    var cardName = document.getElementById('cardName').value;
+    var expiryMonth = document.getElementById('expiryMonth').value; 
+    var expiryYear = document.getElementById('expiryYear').value; 
+    var cvv = document.getElementById('cvv').value;
+    // Validate card number
+    if (cardNumber.length !== 16) {
+        document.getElementById('errorMsg').innerText = 'Please enter a valid 16-digit card number';
+        return;
+    }
+
+    // Validate CVV
+    if (cvv.length !== 3 || isNaN(cvv)) {
+        document.getElementById('errorMsg').innerText = 'Please enter a valid 3-digit CVV (The 3 numbers on the back of your card)';
+        return;
+    }
+    
+});
 
     </script>
 </div>
