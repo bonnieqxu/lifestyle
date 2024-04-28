@@ -23,17 +23,34 @@
       </div>
     </div>
 </section>
-
+<style>
+    .img-placeholder {
+    width: 100px; /* Adjust width as needed */
+    height: 100px; /* Adjust height as needed */
+    }
+  </style>
+  
+  <script>
+  
+  function showImage(imageUrl) {
+      document.getElementById('popupImage').src = imageUrl;
+      document.getElementById('imagePopup').style.display = 'block';
+  }
+  
+  function closeImage() {
+      document.getElementById('imagePopup').style.display = 'none';
+  }
+  </script>
 <div class="container">
     <br>
     <div class="row">
       <div class="col-12">
         <table class="table table-striped table-hover">
             <tr class="table-primary">
-                <th>Topic</th>
-                <th>Description</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th>Topic</th>
+                <th>Description</th>
                 <th>Location</th>
                 <th>Cost</th>
                 <th>Action</th>
@@ -41,11 +58,18 @@
         <tbody>
             {% for workshop in booked_workshop %}
             <tr>
+                <td style="width: 120px;">{{ workshop[4].strftime('%d-%m-%Y') }}</td>
+                <td style="width: 100px;">{{ workshop[5] }}</td>
                 <td>{{ workshop[2] }}</td>
                 <td>{{ workshop[3] }}</td>
-                <td>{{ workshop[4].strftime('%d-%m-%Y') }}</td>
-                <td>{{ workshop[5] }}</td>
-                <td>{{ workshop[6] }}{{ workshop[7] }}</td>
+                <td>{{ workshop[6] }} {{ workshop[7] if workshop[7] is not none }}
+                  {% if workshop[10] is not none %}
+                  <a href="#" onclick="showImage('{{ url_for('static', filename='images/' + workshop[10]) }}')">
+                      <i class='fa fa-map-marker'></i>
+                      View Map
+                  </a>
+              {% endif %}
+                </td>
                 <td>${{ workshop[8] }}</td>
 
                 <td>
@@ -59,5 +83,8 @@
         </tbody>
     </table>
 </div>
-
+<div id="imagePopup" class="popup">
+    <span class="close" onclick="closeImage()">&times;</span>
+    <img id="popupImage" class="popup-content">
+  </div>
 {% endblock %}

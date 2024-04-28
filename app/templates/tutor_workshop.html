@@ -4,7 +4,24 @@
 
 {% block content %}
 
-
+<style>
+    .img-placeholder {
+    width: 100px; /* Adjust width as needed */
+    height: 100px; /* Adjust height as needed */
+    }
+  </style>
+  
+  <script>
+  
+  function showImage(imageUrl) {
+      document.getElementById('popupImage').src = imageUrl;
+      document.getElementById('imagePopup').style.display = 'block';
+  }
+  
+  function closeImage() {
+      document.getElementById('imagePopup').style.display = 'none';
+  }
+  </script>
 
 <div class="col-lg-6 col-md-8 mx-auto text-center">
     <h1 class="fw-light">Workshop Schedule</h1>
@@ -25,8 +42,8 @@
         <button type="submit" name="clear_filter" class="btn btn-primary">Clear Filter</button>
     </form>
     <br><br>
-    <table class="table">
-        <thead>
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
             <tr>   
                 <th>Date</th>
                 <th>Time</th>
@@ -41,7 +58,13 @@
                 <td>{{ workshop[4].strftime('%d-%m-%Y') }}</td> <!-- Date -->
                 <td>{{ workshop[5] }}</td> <!-- Time -->
                 <td>{{ workshop[2] }}</td> <!-- Topic -->
-                <td>{{ workshop[6] }}</td> <!-- Location -->
+                <td>{{ workshop[6] }} {{ workshop[7] if workshop[7] is not none }}
+                    {% if workshop[10] is not none %}
+                    <a href="#" onclick="showImage('{{ url_for('static', filename='images/' + workshop[10]) }}')">
+                        <i class='fa fa-map-marker'></i>
+                        View Map
+                    </a>
+                {% endif %}</td> <!-- Location -->
                 <td>{{ workshop[1] }}</td> <!-- Tutor -->
             </tr>
             {% else %}
@@ -52,6 +75,10 @@
         </tbody>
     </table>
 </div>
+<div id="imagePopup" class="popup">
+    <span class="close" onclick="closeImage()">&times;</span>
+    <img id="popupImage" class="popup-content">
+  </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {

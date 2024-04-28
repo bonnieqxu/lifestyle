@@ -1,6 +1,6 @@
 {% extends 'home_page.html' %}
 
-{% block title %}Attendance Check{% endblock %}
+{% block title %}Attendance Patterns Report{% endblock %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
 <section class="text-center container">
     <div class="row py-lg-2">
       <div class="col-lg-6 col-md-8 mx-auto">
-        <h1 class="fw-light">Attendance Check</h1>
+        <h1 class="fw-light">Attendance Patterns Report</h1>
         <h3 class="fw-light">{{type}}</h3>
         <h3 class="fw-light">{{topic}}</h3>
         <h3 class="fw-light">{{date}}</h3>
@@ -19,7 +19,6 @@
 
 <div class="container">
 <br>
-<form method="POST" action="/updateattendance" >
     <div class="row">
       <div class="col-12">
         <table class="table table-striped table-hover">
@@ -29,7 +28,6 @@
                 <th>Email</th>
                 <th>Address</th>
                 <th>DOB</th>
-                <th>Attendance Check</th>
             </tr>
             {% for booking in bookinglist %}
                 <tr>
@@ -38,28 +36,12 @@
                     <td>{{ booking[7] if booking[7] is not none }} </td>
                     <td>{{ booking[8] if booking[8] is not none }} </td>
                     <td>{{ booking[9].strftime('%d-%m-%Y') if booking[9] is not none }} </td>
-                        <td>
-                          {% if booking[10] == true %}
-                          <input type="checkbox" name="checkbox" checked disabled>
-                          {% else %}
-                        <input type="checkbox" name="checkbox" value="{{booking[0]}}">
-                          {% endif %}
-                         
-                        <!--<a href="#" onclick="markAttendance('{{booking[0]}}','{{ booking[3]}} {{booking[4]}}  {{booking[5] }}')" class="btn btn-primary">Mark</a>-->
-                        </td>
             {% endfor %}
         </table>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <a href="{{ url_for('trackattendance') }}" class="btn btn-primary">Back</a>
+        <a href="{{ url_for('patterns_report') }}" class="btn btn-primary">Back</a>
       </div>
     </div>
 </div>
-<!-- Hidden form for deletion -->
-
-    <input type="hidden" name="type" value="{{type}}" id="type">
-    <input type="hidden" name="workshopID" value="{{workshopID}}" id="workshopID">
-    <input type="hidden" name="lessonID" value="{{lessonID}}" id="lessonID">
-</form>
 
 
 {% endblock content%}

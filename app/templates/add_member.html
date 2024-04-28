@@ -19,7 +19,7 @@
     <div>
             <h5 class="text-primary">Personal Information</h5>
             <div class="form-group row">
-                <b>{{form.username.label(class="form-control-label")}}</b>
+                <b>{{form.username.label(class="form-control-label")}}{% if form.username.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.username.errors%}
                 {{form.username(class="form-control is-invalid")}}
                     {%for error in form.username.errors%}
@@ -30,7 +30,7 @@
                 {%endif%}
             </div>
             <div class="form-group row">
-                <b>{{form.password.label(class="form-control-label")}}</b>
+                <b>{{form.password.label(class="form-control-label")}}{% if form.password.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.password.errors%}
                 {{form.password(class="form-control is-invalid")}}
                     {%for error in form.password.errors%}
@@ -41,7 +41,7 @@
                 {%endif%}
             </div>
             <div class="form-group row">
-                <b>{{form.confirm_password.label(class="form-control-label")}}</b>
+                <b>{{form.confirm_password.label(class="form-control-label")}}{% if form.confirm_password.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.confirm_password.errors%}
                 {{form.confirm_password(class="form-control is-invalid")}}
                     {%for error in form.confirm_password.errors%}
@@ -63,7 +63,7 @@
                 {%endif%}
             </div>
             <div class="form-group row">
-                <b>{{form.firstname.label(class="form-control-label")}}</b>
+                <b>{{form.firstname.label(class="form-control-label")}}{% if form.firstname.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.firstname.errors%}
                 {{form.firstname(class="form-control is-invalid")}}
                     {%for error in form.firstname.errors%}
@@ -74,7 +74,7 @@
                 {%endif%}
             </div>
             <div class="form-group row">
-                <b>{{form.lastname.label(class="form-control-label")}}</b>
+                <b>{{form.lastname.label(class="form-control-label")}}{% if form.lastname.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.lastname.errors%}
                 {{form.lastname(class="form-control is-invalid")}}
                     {%for error in form.lastname.errors%}
@@ -107,7 +107,7 @@
                 {%endif%}
             </div>
             <div class="form-group row">
-                <b>{{form.email.label(class="form-control-label")}}</b>
+                <b>{{form.email.label(class="form-control-label")}}{% if form.email.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
                 {%if form.email.errors%}
                 {{form.email(class="form-control is-invalid")}}
                     {%for error in form.email.errors%}

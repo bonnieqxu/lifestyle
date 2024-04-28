@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 </head>
-<body>
+<body class="bg-image" style="background-image: url('/static/background2.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-color: rgba(200, 200, 200, 0.1);">
 <nav class="navbar navbar-dark bg-primary d-flex">
     <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
     <div class="ml-auto d-flex">
@@ -19,25 +19,26 @@
 <div class="register">
     <h1 class="text-center">Sign up</h1>
 
+
     <form id="RegistrationForm" action="/register" method="post" autocomplete="off" class="mt-4">
         {{ form.csrf_token }}
         <div class="form-group">
-            <b>{{ form.username.label }}</b>
+            <b>{{ form.username.label }}{% if form.username.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
             {{ form.username(class="form-control", required=True) }}
             {% for error in form.username.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
             {% endfor %}
         </div>
         <div class="form-group">
-            <b>{{ form.password.label }}</b>
-            {{ form.password(class="form-control", required=True) }}
+            <b>{{ form.password.label }}{% if form.password.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
+            {{ form.password(class="form-control", required=True, pattern="(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}", title="Password must be at least 8 characters long and include a mix of character types") }}
             {% for error in form.password.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
             {% endfor %}
-            <small class="form-text text-muted">Password must be at least 8 characters long.</small>
+            <small class="form-text text-muted">Password must be at least 8 characters long and include a mix of character types.</small>
         </div>
         <div class="form-group">
-            <b>{{ form.confirm_password.label }}</b>
+            <b>{{ form.confirm_password.label }}{% if form.confirm_password.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
             {{ form.confirm_password(class="form-control", required=True) }}
             {% for error in form.confirm_password.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
@@ -51,14 +52,14 @@
             {% endfor %}
         </div>
         <div class="form-group">
-            <b>{{ form.firstname.label }}</b>
+            <b>{{ form.firstname.label }}{% if form.firstname.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
             {{ form.firstname(class="form-control", required=True) }}
             {% for error in form.firstname.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
             {% endfor %}
         </div>
         <div class="form-group">
-            <b>{{ form.lastname.label }}</b>
+            <b>{{ form.lastname.label }}{% if form.lastname.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
             {{ form.lastname(class="form-control", required=True) }}
             {% for error in form.lastname.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
@@ -66,13 +67,13 @@
         </div>
         <div class="form-group">
             <b>{{ form.phone.label }}</b>
-            {{ form.phone(class="form-control", required=True) }}
+            {{ form.phone(class="form-control") }}
             {% for error in form.phone.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
             {% endfor %}
         </div>
         <div class="form-group">
-            <b>{{ form.email.label }}</b>
+            <b>{{ form.email.label }}{% if form.email.flags.required %}<span style="color:red;">*</span>{% endif %}</b>
             {{ form.email(class="form-control", required=True) }}
             {% for error in form.email.errors %}
                 <small class="form-text text-danger">{{ error }}</small>
@@ -98,7 +99,7 @@
             <button type="button" class="btn btn-secondary btn-block mt-3" onclick="redirectToHome()">Cancel</button>
         </div>
     </form>
-    <div class="msg">
+    <div class="msg" style="color: red;">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -112,8 +113,6 @@
     </div>
 </div>
 <script>
-
-
     function redirectToHome() {
         window.location.href = "{{ url_for('landingpage') }}";
     }

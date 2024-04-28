@@ -9,11 +9,7 @@
 <br>
 <fieldset>
 <legend class="border-botton mb-4"> 
-    {% if view != True %}
-    Edit Profile
-    {% else %}
-    View Profile
-    {%endif%}
+    View Member Profile
    </legend>
 
    <div class="container">
@@ -110,14 +106,6 @@
                     {{form.dob(class="form-control")}}
                 {%endif%}
             </div>
-            {% if view != True %}
-            <div class="form-group row">
-                <!-- Image Gallery -->
-             {{ form.images.label }}
-             {{ form.images }}
-             {{ form.images.errors }}
-             </div>
-             {% endif %}
  
                  <!-- Existing Images -->
              <h5 class="text-primary">Existing Image</h5>
@@ -127,14 +115,6 @@
                      <div class="col-md-4">
                          <div class="card mb-4 shadow-sm">
                              <img src="{{ url_for('static', filename='images/' +image_filename) }}" alt="Image">
-                             {% if view != True %}
-                             <div class="form-check">
-                                 <input class="form-check-input" type="checkbox"  name="option" value="{{ image_filename }}" id="flexCheckDefault">
-                                 <label class="form-check-label" for="flexCheckDefault">
-                                 Delete
-                                 </label>
-                             </div>
-                             {% endif %}
                          </div>
                      </div>
                      {% endfor %}
@@ -143,11 +123,7 @@
 </fieldset>
             <div class="form-group row">
                 <div class="col-sm-10 offset-sm-2">
-                    {% if view != True %}
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    {% else %}
-                    <a href="{{ url_for('viewtutorlessonbookinglist') }}" class="btn btn-primary">Back</a>
-                    {% endif%}
+                    <a href="{{ url_for('subscription_report') }}" class="btn btn-primary">Back</a>
                 </div>
                 <div class="msg">{{ msg }}</div>
             </div>

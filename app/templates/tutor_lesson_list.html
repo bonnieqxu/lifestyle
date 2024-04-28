@@ -46,8 +46,8 @@
             </tr>
             {% for tutorlesson in tutorlessonlist %}
                 <tr>
-                    <td>{{ tutorlesson[2].strftime('%d-%m-%Y') if tutorlesson[2] is not none }}</td>
-                    <td>{{ tutorlesson[3] if tutorlesson[3] is not none }}</td>
+                    <td style="width: 120px;">{{ tutorlesson[2].strftime('%d-%m-%Y') if tutorlesson[2] is not none }}</td>
+                    <td style="width: 100px;">{{ tutorlesson[3] if tutorlesson[3] is not none }}</td>
                     <td>{{ tutorlesson[4] if tutorlesson[4] is not none }} {{ tutorlesson[5] if tutorlesson[5] is not none }}</td>
                     <td>{{ tutorlesson[6] if tutorlesson[6] is not none }} </td>
                     <td>{{ tutorlesson[7] if tutorlesson[7] is not none }} </td>

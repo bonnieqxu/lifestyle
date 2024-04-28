@@ -35,8 +35,8 @@
             </tr>
             {% for lesson in alltutorlessons %}
                 <tr>
-                    <td>{{ lesson[5].strftime('%d-%m-%Y') }}</td> <!-- Date -->
-                    <td>{{ lesson[6] }}</td> <!-- Time -->
+                    <td style="width: 120px;">{{ lesson[5].strftime('%d-%m-%Y') }}</td> <!-- Date -->
+                    <td style="width: 100px;">{{ lesson[6] }}</td> <!-- Time -->
                     <td>{{ lesson[2] }}</td> <!-- Lesson Title -->
                     <td>{{ lesson[3] }}</td> <!-- Tutor Name -->
                     <td>{% if lesson[4] is none %}{% else %}{{ lesson[4] }}{% endif %}</td> <!-- Location -->                    

@@ -7,6 +7,28 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+
+    {% if session.loggedin %}
+    {% if session.userrole == 'MM' %}
+        <style>
+            body.loggedin {
+                background-color: rgba(243, 243, 176, 0.548) !important;
+            }
+        </style>
+    {% elif session.userrole == 'TT' %}
+        <style>
+            body.loggedin {
+                background-color: rgba(181, 240, 181, 0.5) !important;
+            }
+        </style>
+    {% elif session.userrole == 'MG' %}
+        <style>
+            body.loggedin {
+                background-color: rgba(226, 183, 191, 0.411) !important;
+            }
+        </style>
+    {% endif %}
+{% endif %}
 </head>
 <body class="loggedin">
 <nav class="navbar navbar-dark bg-primary d-flex">
@@ -17,23 +39,21 @@
                 <a class="nav-link text-white" href="{{ url_for('member_home') }}"><i class="fas fa-home"></i> Home</a>
                 <div class="dropdown">
                     <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-cog"></i> Edit
+                        <i class="fas fa-tools nav-icon mr-2"></i> Edit
                     </a>
                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                        <a class="dropdown-item" href="{{ url_for('member_profile') }}"><i class="fa fa-th-list"></i> Profile</a>
-                        <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fa fa-list-alt"></i> Password</a>
+                        <a class="dropdown-item" href="{{ url_for('member_profile') }}"><i class="fa fa-user mr-2" aria-hidden="true"></i> Profile</a>
+                        <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fas fa-lock nav-icon mr-2"></i>Password</a>
                     </div>
                 </div>
                 <div class="dropdown">
                     <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-cog"></i> View
+                        <i class="fa fa-search" aria-hidden="true"></i> View
                     </a>
                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                        <a class="dropdown-item" href="{{ url_for('view_tutor_list') }}"><i class="fa fa-th-list"></i> Tutors</a>
-                        <a class="dropdown-item" href="#"><i class="fa fa-list-alt"></i> Schedules</a>
-                        <a class="dropdown-item" href="{{ url_for('view_workshop_list') }}"><i class="fa fa-list-alt"></i> Workshop</a>
-                        <a class="dropdown-item" href="#"><i class="fa fa-list-alt"></i> Reminders</a>
-                        <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper"></i> News</a>
+                        <a class="dropdown-item" href="{{ url_for('view_tutor_list') }}"><i class="fas fa-chalkboard-teacher nav-icon mr-2"></i> Tutors</a>
+                        <a class="dropdown-item" href="{{ url_for('view_workshop_list') }}"><i class="fa fa-check-square mr-2" aria-hidden="true"></i> Workshop</a>
+                        <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper mr-2"></i> News</a>
                     </div>
                 </div>
                 <div class="dropdown">
@@ -41,10 +61,9 @@
                         <i class="fa fa-cog"></i> Manage
                     </a>
                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                        <a class="dropdown-item" href="{{ url_for('member_subscription') }}"><i class="fa fa-users"></i> Subscription</a>
-                        <a class="dropdown-item" href="{{ url_for('show_booked_lesson') }}"><i class="fa fa-th-list"></i> Lesson</a>
-                        <a class="dropdown-item" href="{{ url_for('show_booked_workshop') }}"><i class="fa fa-list-alt"></i> Workshop</a>
-                        <a class="dropdown-item" href="#"><i class="fa fa-calendar"></i> Schedules</a>
+                        <a class="dropdown-item" href="{{ url_for('member_subscription') }}"><i class="fa fa-subscript mr-2" aria-hidden="true"></i> Subscription</a>
+                        <a class="dropdown-item" href="{{ url_for('show_booked_lesson') }}"><i class="fas fa-book nav-icon  mr-2"></i> Lesson</a>
+                        <a class="dropdown-item" href="{{ url_for('show_booked_workshop') }}"><i class="fa fa-check-square mr-2" aria-hidden="true"></i> Workshop</a>
                     </div>
                 </div>
                 <a class="nav-link text-white" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -52,11 +71,20 @@
                 <a class="nav-link text-white" href="{{ url_for('tutor_home') }}"><i class="fas fa-home"></i> Home</a>
                 <div class="dropdown">
                     <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-cog"></i> Edit
+                        <i class="fa fa-search" aria-hidden="true"></i> View
                     </a>
                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                        <a class="dropdown-item" href="{{ url_for('tutor_profile') }}"><i class="fa fa-th-list"></i> Profile</a>
-                        <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fa fa-list-alt"></i> Password</a>
+                        <a class="dropdown-item" href="{{url_for('tutor_view_workshop')}}"><i class="fas fa-calendar-check nav-icon mr-2"></i>Workshop</a>
+                        <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper mr-2"></i> News</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-tools nav-icon mr-2"></i> Edit
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="manageDropdown">
+                        <a class="dropdown-item" href="{{ url_for('tutor_profile') }}"><i class="fa fa-user mr-2" aria-hidden="true"></i> Profile</a>
+                        <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fas fa-lock nav-icon mr-2"></i> Password</a>
                     </div>
                 </div>
                 <div class="dropdown dropend">
@@ -64,13 +92,11 @@
                         <i class="fa fa-cog"></i> Manage
                     </a>
                     <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                        <a class="dropdown-item" href="{{url_for('viewtutorlessonbookinglist')}}"><i class="fa fa-th-list"></i> Booking</a>
-                        <a class="dropdown-item" href="{{url_for('viewtutorlessonlist')}}"><i class="fa fa-users"></i> Lessons</a>
-                        <a class="dropdown-item" href="#"><i class="fa fa-list-alt"></i> Workshop</a>
-                        <a class="dropdown-item" href="{{url_for('tutor_view_workshop')}}"><i class="fa fa-calendar"></i> Schedules</a>
-                        <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper"></i> News</a>
+                        <a class="dropdown-item" href="{{url_for('viewtutorlessonbookinglist')}}"><i class="fa fa-th-list mr-2"></i> Booking</a>
+                        <a class="dropdown-item" href="{{url_for('viewtutorlessonlist')}}"><i class="fas fa-book nav-icon  mr-2"></i> Lessons</a>
+                        
                         <a class="dropdown-item dropdown-toggle" href="#" id="pricesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-subscript"></i> Attendance
+                            <i class="fas fa-user-check nav-icon mr-2"></i> Attendance
                         </a>      
                         <div class="dropdown dropdown-menu-end">      
                             <div class="dropdown-menu" aria-labelledby="dropdown-layouts">
@@ -80,16 +106,16 @@
                         </div>
                     </div>
                 </div>
-                <a class="nav-link text-white" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a class="nav-link text-white" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             {% elif session.userrole == 'MG' %}
-            <a class="nav-link text-white" href="{{ url_for('manager_home') }}"><i class="fas fa-home"></i> Home</a>
+            <a class="nav-link text-white" href="{{ url_for('manager_home') }}"><i class="fas fa-home mr-2"></i> Home</a>
             <div class="dropdown">
                 <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-cog"></i> Edit
+                    <i class="fas fa-tools nav-icon mr-2"></i> Edit
                 </a>
                 <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                    <a class="dropdown-item" href="{{ url_for('manager_profile') }}"><i class="fa fa-th-list"></i> Profile</a>
-                    <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fa fa-list-alt"></i> Password</a>
+                    <a class="dropdown-item" href="{{ url_for('manager_profile') }}"><i class="fa fa-user mr-2" aria-hidden="true"></i> Profile</a>
+                    <a class="dropdown-item" href="{{url_for('returnchangepassword')}}"><i class="fas fa-lock nav-icon mr-2"></i> Password</a>
                 </div>
             </div>
             <div class="dropdown dropend">
@@ -97,40 +123,40 @@
                     <i class="fa fa-cog"></i> Manage
                 </a>
                 <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                    <a class="dropdown-item" href="{{url_for('viewmemberlist')}}"><i class="fa fa-users"></i> Members</a>
-                    <a class="dropdown-item" href="{{url_for('viewtutorlist')}}"><i class="fa fa-users"></i> Tutors</a>
-                    <a class="dropdown-item" href="{{url_for('subscription_report')}}"><i class="fa fa-subscript"></i> Subscription</a>                     
+                    <a class="dropdown-item" href="{{url_for('viewmemberlist')}}"><i class="fas fa-user-friends nav-icon mr-2"></i> Members</a>
+                    <a class="dropdown-item" href="{{url_for('viewtutorlist')}}"><i class="fas fa-chalkboard-teacher nav-icon mr-2"></i> Tutors</a>
+                    <a class="dropdown-item" href="{{url_for('subscription_report')}}"><i class="fa fa-subscript mr-2"></i> Subscription</a>                     
                     <a class="dropdown-item dropdown-toggle" href="#" id="pricesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-subscript"></i> Prices
+                        <i class="fas fa-dollar-sign nav-icon mr-2"></i> Prices
                     </a>      
                     <div class="dropdown dropdown-menu-end">      
                         <div class="dropdown-menu" aria-labelledby="pricesDropdown">
-                            <a class="dropdown-item" href="{{url_for('manage_prices')}}">Subscription & Lesson</a>
-                            <a class="dropdown-item" href="{{url_for('manage_workshop_prices')}}">Workshop</a>
+                            <a class="dropdown-item" href="{{url_for('manage_prices')}}"><i class="fas fa-book nav-icon  mr-2"></i> Subscription & Lesson</a>
+                            <a class="dropdown-item" href="{{url_for('manage_workshop_prices')}}"><i class="fa fa-check-square mr-2" aria-hidden="true"></i> Workshop</a>
                         </div>
                     </div>
-                    <a class="dropdown-item" href="{{url_for('trackattendance')}}"><i class="fa fa-list-alt"></i> Attendance</a>
-                    <a class="dropdown-item" href="{{url_for('viewworkshoptypelist')}}"><i class="fa fa-list-alt"></i> Workshop</a>
-                    <a class="dropdown-item" href="{{url_for('viewlessontypelist')}}"><i class="fa fa-list-alt"></i> Lesson</a>
-                    <a class="dropdown-item" href="{{url_for('manage_workshop_list')}}"><i class="fa fa-calendar"></i> Schedules</a>
-                    <a class="dropdown-item" href="{{url_for('alltutorlessons')}}"><i class="fa fa-calendar"></i>Lesson Schedules</a>
-                    <a class="dropdown-item" href="{{url_for('viewlocationlist')}}"><i class="fa fa-map-marker"></i> Location</a>
-                    <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper"></i> News</a>
-                    <a class="dropdown-item" href="{{url_for('trackpayment')}}"><i class="fa fa-newspaper"></i> Payment</a>
+                    <a class="dropdown-item" href="{{url_for('trackattendance')}}"><i class="fas fa-user-check nav-icon mr-2"></i> Attendance</a>
+                    <a class="dropdown-item" href="{{url_for('viewworkshoptypelist')}}"><i class="fa fa-check-square mr-2" aria-hidden="true"></i> Workshop Type</a>
+                    <a class="dropdown-item" href="{{url_for('viewlessontypelist')}}"><i class="fas fa-book nav-icon  mr-2"></i> Lesson Type</a>
+                    <a class="dropdown-item" href="{{url_for('manage_workshop_list')}}"><i class="fas fa-calendar-check nav-icon mr-2"></i> Workshop Schedules</a>
+                    <a class="dropdown-item" href="{{url_for('alltutorlessons')}}"><i class="fas fa-calendar-check nav-icon mr-2"></i> Lesson Schedules</a>
+                    <a class="dropdown-item" href="{{url_for('viewlocationlist')}}"><i class="fas fa-map-marker-alt nav-icon mr-2"></i> Location</a>
+                    <a class="dropdown-item" href="{{url_for('newslist')}}"><i class="fa fa-newspaper mr-2"></i> News</a>
                     </div>
                 </div>
             </div>
             <div class="dropdown">
                 <a class="nav-link text-white dropdown-toggle" href="#" role="button" id="manageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-cog"></i> Financial Report
+                    <i class="fas fa-chart-bar nav-icon mr-2"></i>Financial Report
                 </a>
                 <div class="dropdown-menu" aria-labelledby="manageDropdown">
-                                            
-                    <a class="dropdown-item" href="{{url_for('revenue')}}"><i class="fa fa-flag"></i> Revenue</a>
-                    <a class="dropdown-item" href="{{ url_for('workshop_report') }}"><i class="fa fa-flag"></i> Popular</a>
+                    <a class="dropdown-item" href="{{url_for('trackpayment')}}"><i class="fa fa-credit-card  mr-2" aria-hidden="true"></i> Payment</a>   
+                    <a class="dropdown-item" href="{{url_for('revenue')}}"><i class="fas fa-chart-line nav-icon mr-2"></i> Revenue</a>
+                    <a class="dropdown-item" href="{{ url_for('workshop_report') }}"><i class="fa fa-flag mr-2"></i> Popular</a>
+                    <a class="dropdown-item" href="{{ url_for('patterns_report') }}"><i class="fa fa-flag-checkered mr-2"></i> Patterns</a>
                 </div>
             </div>
-                <a class="nav-link text-white" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a class="nav-link text-white" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             {% endif %}
         {% endif %}
     </div>

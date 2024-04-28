@@ -31,8 +31,8 @@
             </tr>
             {% for tutorlessonbooking in tutorlessonbookinglist %}
                 <tr>
-                    <td>{{ tutorlessonbooking[1].strftime('%d-%m-%Y')  if tutorlessonbooking[1] is not none }}</td>
-                    <td>{{ tutorlessonbooking[2] if tutorlessonbooking[2] is not none }}</td>
+                    <td style="width: 120px;">{{ tutorlessonbooking[1].strftime('%d-%m-%Y')  if tutorlessonbooking[1] is not none }}</td>
+                    <td style="width: 100px;">{{ tutorlessonbooking[2] if tutorlessonbooking[2] is not none }}</td>
                     <td>{{ tutorlessonbooking[3]}} {{tutorlessonbooking[4]}}  {{tutorlessonbooking[5] }}</td>
                     <td>{{ tutorlessonbooking[6] if tutorlessonbooking[6] is not none }} </td>
                     <td>{{ tutorlessonbooking[7] if tutorlessonbooking[7] is not none }} </td>

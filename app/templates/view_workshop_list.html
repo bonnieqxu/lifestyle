@@ -16,6 +16,25 @@
   </section>
 </head>
 
+<style>
+  .img-placeholder {
+  width: 100px; /* Adjust width as needed */
+  height: 100px; /* Adjust height as needed */
+  }
+</style>
+
+<script>
+
+function showImage(imageUrl) {
+    document.getElementById('popupImage').src = imageUrl;
+    document.getElementById('imagePopup').style.display = 'block';
+}
+
+function closeImage() {
+    document.getElementById('imagePopup').style.display = 'none';
+}
+</script>
+
 <div class="container">
   <br>
   <div class="row">
@@ -39,8 +58,15 @@
                     <td>{{ workshop[6] }} </td>
                     <td>{{ workshop[1] }}</td>
                     <td>{{ workshop[3] }}</td>
-                    <td>{{ workshop[7] }}{{ workshop[8] }}</td>
-                    <td>{{ workshop[9] }}</td>
+                    <td>{{ workshop[7] }} {{ workshop[8] if workshop[8] is not none }}
+                      {% if workshop[10] is not none %}
+                      <a href="#" onclick="showImage('{{ url_for('static', filename='images/' + workshop[10]) }}')">
+                          <i class='fa fa-map-marker'></i>
+                          View Map
+                      </a>
+                  {% endif %}
+                    </td>
+                    <td>${{ workshop[9] }}</td>
                     <td> <a href="{{ url_for('view_workshop_details', workshop_id=workshop[0]) }}">View Details</a> </td>
                     <td>
                       <a href="{{ url_for('bookingpayment_workshop', workshop_id=workshop[0]) }}" class="btn btn-primary">Book Now</a>
@@ -54,6 +80,11 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div id="imagePopup" class="popup">
+  <span class="close" onclick="closeImage()">&times;</span>
+  <img id="popupImage" class="popup-content">
 </div>
 
 {% endblock %}

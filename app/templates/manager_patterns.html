@@ -1,0 +1,219 @@
+{% extends 'home_page.html' %}
+{% block title %}Attendance Patterns Report{% endblock %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .details {
+        max-width: 150px; /* Adjust the width as needed */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+<section class="text-center container">
+    <div class="row py-lg-2">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Attendance Patterns Report</h1>
+      </div>
+    </div>
+</section>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('patterns_report') }}" method="post">
+                        <button type="submit" class="btn btn-primary" name="filter" value="lesson">Lesson</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                    <form action="{{ url_for('patterns_report') }}" method="post">
+                        <button type="submit" class="btn btn-warning" name="filter" value="workshop">Workshop</button>
+                    </form>
+                </div>
+                <div class="d-flex align-items-center">
+                        <button onclick="openChartModal()" class="btn btn-success">View Graph</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <div class="d-flex align-items-center">
+                <form id="submitForm" action="{{ url_for('patterns_report') }}" method="post">
+                  From Date: <input type="date" id="start" name="start" min="2024-01-01" max="2028-12-31" />
+                  To Date: <input type="date" id="end" name="end" min="2024-01-01" max="2028-12-31" />
+                  <button class="btn btn-primary" name="show" id="show" value="" onclick="submitForm()">Filter</button>
+              </form>
+              </div>
+          </div>
+        </div>
+
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                  <table class="table table-striped table-hover">
+                      <tr class="table-primary">
+                        <th>Date</th>
+                        <th>Start Time</th>
+                        <th>Topic</th>
+                        <th class="details">Detail</th>
+                        <th>Location</th>
+                        <th>Capacity Limit</th>
+                        <th>Member Attended</th>
+                        <th>Type</th> 
+                        <th>View Attendee(s)</th>          
+                    </tr>
+                </thead>
+                <tbody>               
+                    {% if filter == "lesson" %}
+                        {% for booking in lesson %}
+                            <tr>
+                                <td style="width: 120px;">{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td style="width: 100px;">{{ booking[2] if booking[2] is not none }} </td> 
+                                <td>{{ booking[3] if booking[3] is not none }} </td> 
+                                <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
+                                <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 
+                                <td>{{ booking[8] if booking[8] is not none }} </td> 
+                                <td>{{ booking[11] if booking[11] is not none }} </td> 
+                                <td>Lesson </td> 
+                                <td>
+                                    <a href="{{ url_for('viewlessonattendancepatterns', lesson_id=booking[0]) }}" class="btn btn-primary">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for booking in workshop %}
+                            <tr>
+                                <td style="width: 120px;">{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td style="width: 100px;">{{ booking[2] if booking[2] is not none }} </td> 
+                                <td>{{ booking[3] if booking[3] is not none }} </td> 
+                                <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
+                                <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 
+                                <td>{{ booking[8] if booking[8] is not none }} </td> 
+                                <td>{{ booking[11] if booking[11] is not none }} </td> 
+                                <td>Workshop </td> 
+                                <td>
+                                    <a href="{{ url_for('viewworkshopattendancepatterns', workshop_id=booking[0]) }}" class="btn btn-primary">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> <!-- Use modal-lg class to increase the size of the modal -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="chartModalLabel">Workshop and Lesson Details</h5>
+          <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="container"> <!-- bar chart container inside the modal -->
+            <canvas id="barChart" width="800" height="400"></canvas> <!-- Adjust the size of the bar chart container -->
+          </div>
+          <p id="workshopDetails"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  <!-- pop up barchart modal -->
+  <script>
+    function openChartModal() {
+    $('#chartModal').modal('show');
+    document.getElementById('chartModalLabel').innerText = 'Workshop and Lesson Details';
+  }
+
+  function closeModal() {
+    $('#chartModal').modal('hide');
+  }
+
+  function submitForm() {
+    var startDate = document.getElementById('start').value;
+    var endDate = document.getElementById('end').value;
+    if(startDate=="" || endDate == ""){
+      alert('Please enter From Date and To Date to filter the report');
+    }else{
+      document.getElementById('show').value = "show";
+      document.getElementById('submitForm').submit();
+    }
+  }
+  
+    // When the page is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+    // Get the workshop titles, attendance data, and details
+    var workshopTitles = {{ workshop_titles|tojson }};
+    var attendanceData = {{ attendance_data|tojson }};
+    var workshopDetails = {{ workshop_details|tojson }};
+
+    var lessonTitles = {{ lesson_titles|tojson }};
+    var lessonattendanceData = {{ lesson_attendance_data|tojson }};
+    var lessonDetails = {{ lesson_details|tojson }};
+  
+    // Get the bar chart container
+    var ctx = document.getElementById('barChart').getContext('2d');
+  
+    // Generate the bar chart
+    var barChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: workshopTitles,
+        datasets: [{
+          label: 'Workshop Attendance',
+          data: attendanceData,
+          backgroundColor: 'blue' // Set the color of the bar chart to blue
+        },
+        {
+          label: 'Lesson Attendance',
+          data: lessonattendanceData,
+          backgroundColor: 'green' // Set the color of the bar chart to green
+        }]
+        
+      },
+      options: {
+        onClick: function (event, elements) {
+          // Get the index of the X axis element clicked by the user
+          var activePoint = elements[0];
+          if (activePoint) {
+            // Get the index of the workshop clicked by the user
+            var index = activePoint.index;
+            var chartType = activePoint.datasetIndex; // Get the dataset index to differentiate between workshop and lesson
+
+            if (chartType === 0) { // Workshop chart
+                document.getElementById('chartModalLabel').innerText = workshopTitles[index];
+                document.getElementById('workshopDetails').innerText = workshopDetails[index];
+            } else if (chartType === 1) { // Lesson chart
+                document.getElementById('chartModalLabel').innerText = lessonTitles[index];
+                document.getElementById('workshopDetails').innerText = lessonDetails[index];
+            }
+            // Show the modal
+            $('#chartModal').modal('show');
+          }
+        },
+      }
+    });
+  
+    // When the modal is closed, clear the workshop details
+    $('#chartModal').on('hidden.bs.modal', function () {
+      document.getElementById('workshopDetails').innerText = '';
+      document.getElementById('chartModalLabel').innerText = '';
+    });
+  });
+  
+  </script>
+
+{% endblock %}

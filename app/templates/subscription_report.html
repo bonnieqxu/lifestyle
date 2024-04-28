@@ -40,7 +40,7 @@
             </ul>
             <table id="subscriptionTable" class="table">
                 <thead>
-                    <tr>
+                    <tr class="table-primary">
                         <th>Member Name</th>
                         <th>Phone Number</th>
                         <th>Email</th>
@@ -57,13 +57,20 @@
                         {% for member in expired_members %}
                             <tr>
                                 <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
-                                <td>{{ member[5] }}</td>
-                                <td>{{ member[6] }}</td>
-                                <td>{{ member[7] }}</td>
+                                <td>{{ member[5] if member[5] is not none }}</td>
+                                <td>{{ member[6] if member[6] is not none }}</td>
+                                <td>{{ member[7] if member[7] is not none }}</td>
                                 <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
-                                <td>{{ member[4] }}</td>     
+                                <td>{{ member[4] if member[4] is not none }}</td>     
                                 <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
-                                <td>{{ member[10] }}</td>                        
+                                <td> {% if member[10] is not none %}
+                                        {% if member[10] == 'M' %}
+                                            Monthly
+                                        {% elif member[10] == 'Y' %}
+                                            Annual
+                                        {% endif %} 
+                                    {% endif %}     
+                                </td>                 
                                 <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
                             </tr>
                         {% endfor %}
@@ -71,13 +78,19 @@
                         {% for member in near_to_expire_members %}
                             <tr>
                                 <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
-                                <td>{{ member[5] }}</td>
-                                <td>{{ member[6] }}</td>
-                                <td>{{ member[7] }}</td>
+                                <td>{{ member[5] if member[5] is not none }}</td>
+                                <td>{{ member[6] if member[6] is not none }}</td>
+                                <td>{{ member[7] if member[7] is not none }}</td>
                                 <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
-                                <td>{{ member[4] }}</td>     
+                                <td>{{ member[4] if member[4] is not none }}</td>     
                                 <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
-                                <td>{{ member[10] }}</td>                        
+                                <td>{% if member[10] is not none %}
+                                        {% if member[10] == 'M' %}
+                                            Monthly
+                                        {% elif member[10] == 'Y' %}
+                                            Annual
+                                        {% endif %} 
+                                    {% endif %} </td>                        
                                 <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
                             </tr>
                         {% endfor %}
@@ -85,14 +98,20 @@
                         {% for member in members %}
                             <tr>
                                 <td>{{ member[1] }} {{ member[2] }} {{ member[3] }}</td>
-                                <td>{{ member[5] }}</td>
-                                <td>{{ member[6] }}</td>
-                                <td>{{ member[7] }}</td>
-                                <td>{{ member[8].strftime('%d-%m-%Y') }}</td>
-                                <td>{{ member[4] }}</td>     
-                                <td><a href="/viewtutormemberprofile/{{member[0]}}">View Member Profile</a></td>
-                                <td>{{ member[10] }}</td>                        
-                                <td>{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
+                                <td>{{ member[5] if member[5] is not none }}</td>
+                                <td>{{ member[6] if member[6] is not none }}</td>
+                                <td>{{ member[7] if member[7] is not none }}</td>
+                                <td style="width: 120px;">{{ member[8].strftime('%d-%m-%Y') }}</td>
+                                <td>{{ member[4] if member[4] is not none }}</td>     
+                                <td><a href="/subscriptionreportviewmember/{{member[0]}}">View Member Profile</a></td>
+                                <td>{% if member[10] is not none %}
+                                        {% if member[10] == 'M' %}
+                                            Monthly
+                                        {% elif member[10] == 'Y' %}
+                                            Annual
+                                        {% endif %} 
+                                    {% endif %} </td>                        
+                                <td style="width: 120px;">{{ member[11].strftime('%d-%m-%Y') if member[11] is not none }}</td>
                             </tr>
                         {% endfor %}
                     {% endif %}
@@ -101,6 +120,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

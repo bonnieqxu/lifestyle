@@ -3,6 +3,43 @@
 {% block title %}Add Lesson{% endblock %}
 
 {% block content %}
+<style>
+    .modal {
+        display: none; 
+        position: fixed; 
+        z-index: 1; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.4); 
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    </style>
+    
 <div class="container w-50">
     <form method="POST" action="/insertalesson">
 {{form.hidden_tag()}}
@@ -124,14 +161,41 @@
             </div>
             <div id="timeErrorMessage" style="display: none; color: red;">Please select a time between 8am and 5pm.<br><br></div>
 
+            <button id="openModal">Check for Available Tutor</button>
         </fieldset>
             <div class="form-group row">
                 <div class="col-sm-10 offset-sm-2">
+                    <br>
+                    <br>
                     <button type="submit" class="btn btn-primary">Add Lesson</button>
                     <a href="{{ url_for('alltutorlessons') }}" class="btn btn-primary">Cancel</a>
                 </div>
                 <div class="msg" style="color: red;">{{ msg }}</div>
             </div>
+    </div>
+</div>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Available Tutor</h3>
+        <div class="container">
+            <br>
+            <div class="row">
+              <div class="col-12">
+                <table id="availabilityTable">
+                    <thead>
+                        <tr>
+                            <th>Tutor Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="availabilityBody">
+                        <!-- Table body will be populated dynamically -->
+                    </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -175,6 +239,57 @@
             document.getElementById("timeErrorMessage").style.display = "none";
         }
     });
+
+    const modal = document.getElementById('myModal');
+    const btn = document.getElementById("openModal");
+    const span = document.getElementsByClassName("close")[0];
+
+    btn.onclick = function() {
+        event.preventDefault();
+        modal.style.display = "block";
+        loadTableData();
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    function loadTableData() {
+
+        const workshopDate = document.getElementById("lesson_date").value;
+        const startTime = document.getElementById("lesson_start_time").value;
+
+        fetch('/check_availability', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                workshopDate: workshopDate,
+                startTime: startTime
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Populate the table with the fetched data
+            const tableBody = document.getElementById("availabilityBody");
+            tableBody.innerHTML = "";
+            if (data.length > 0) {
+                data.forEach(tutor => {
+                    const tutorName = tutor[0]; // Access the string within the tuple
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${tutorName}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement("tr");
+                row.innerHTML = "<td>No available tutors</td>";
+                tableBody.appendChild(row);
+            }
+        })
+    }
     
 </script>
     

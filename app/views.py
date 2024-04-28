@@ -36,11 +36,12 @@ def view_workshop():
                 wi.workshop_info_topic AS workshop_topic,
                 w.workshop_detail AS workshop_detail,
                 w.workshop_date AS workshop_date,
-                w.workshop_time AS workshop_time,
+                TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
                 CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
                 w.workshop_cost AS workshop_cost,
                 w.workshop_cap_limit AS workshop_cap_limit,
-                w.workshop_attendance AS workshop_attendance
+                w.workshop_attendance AS workshop_attendance,
+                l.location_map AS location_map
             FROM 
                 workshop w
             INNER JOIN 
@@ -49,11 +50,9 @@ def view_workshop():
                 workshop_info wi ON w.workshop_title_id = wi.workshop_info_id
             INNER JOIN 
                 location l ON w.workshop_location = l.location_id
+            WHERE workshop_date >= curdate() 
             ORDER BY workshop_date ASC;
-                """
-
-        #     ORDER BY {};
-        # """.format(sort_by)       
+                """ 
 
         connection.execute(sql)
         workshop_timetable = connection.fetchall()
@@ -105,3 +104,10 @@ def view_tutor_details_for_visitor(tutor_id):
  
             # Render the provided template with retrieved data
         return render_template("view_tutor_details_for_visitor.html", tutor_details=tutor_details)
+
+
+@app.route('/lifestyle_farming_for_visitor')
+def lifestyle_farming_for_visitor():
+    # Render the lifestyle farming tips template
+    return render_template('lifestyle_farming_for_visitor.html')
+

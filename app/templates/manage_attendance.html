@@ -66,8 +66,8 @@
                     {% if filter == "lesson" %}
                         {% for booking in lesson %}
                             <tr>
-                                <td>{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
-                                <td>{{ booking[2] if booking[2] is not none }} </td> 
+                                <td style="width: 120px;">{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td style="width: 100px;">{{ booking[2] if booking[2] is not none }} </td> 
                                 <td>{{ booking[3] if booking[3] is not none }} </td> 
                                 <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
                                 <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 
@@ -82,8 +82,8 @@
                     {% else %}
                         {% for booking in workshop %}
                             <tr>
-                                <td>{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
-                                <td>{{ booking[2] if booking[2] is not none }} </td> 
+                                <td style="width: 120px;">{{ booking[1].strftime('%d-%m-%Y') if booking[1] is not none }} </td> 
+                                <td style="width: 100px;">{{ booking[2] if booking[2] is not none }} </td> 
                                 <td>{{ booking[3] if booking[3] is not none }} </td> 
                                 <td class="details">{{ booking[4] if booking[4] is not none }} </td> 
                                 <td>{{ booking[5] if booking[5] is not none }} {{ booking[6] if booking[6] is not none }}</td> 

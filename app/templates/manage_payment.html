@@ -55,56 +55,56 @@
                     {% if filter == "lesson" %}
                         {% for pay in lesson %}
                             <tr>
-                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td style="width: 120px;">{{ pay[0].strftime('%d-%m-%Y') }}</td>
                                 <td>${{ pay[1] }}</td>
                                 <td>{{ pay[2] if pay[2] is not none }} </td> 
                                 <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
                                 <td>{{ pay[6] if pay[6] is not none }} </td> 
                                 <td>{{ pay[7] if pay[7] is not none }} </td> 
                                 <td>{{ pay[8] if pay[8] is not none }} </td> 
-                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td style="width: 120px;">{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
                                 <td>{{ pay[10] if pay[10] is not none }} </td> 
                             </tr>
                         {% endfor %}
                     {% elif filter == "workshop" %}
                         {% for pay in workshop %}
                             <tr>
-                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td style="width: 120px;">{{ pay[0].strftime('%d-%m-%Y') }}</td>
                                 <td>${{ pay[1] }}</td>
                                 <td>{{ pay[2] if pay[2] is not none }} </td> 
                                 <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
                                 <td>{{ pay[6] if pay[6] is not none }} </td> 
                                 <td>{{ pay[7] if pay[7] is not none }} </td> 
                                 <td>{{ pay[8] if pay[8] is not none }} </td> 
-                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td style="width: 120px;">{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
                                 <td>{{ pay[10] if pay[10] is not none }} </td> 
                             </tr>
                         {% endfor %}
                         {% elif filter == "subscription" %}
                         {% for pay in subscription %}
                             <tr>
-                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td style="width: 120px;">{{ pay[0].strftime('%d-%m-%Y') }}</td>
                                 <td>${{ pay[1] }}</td>
                                 <td>{{ pay[2] if pay[2] is not none }} </td> 
                                 <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
                                 <td>{{ pay[6] if pay[6] is not none }} </td> 
                                 <td>{{ pay[7] if pay[7] is not none }} </td> 
                                 <td>{{ pay[8] if pay[8] is not none }} </td> 
-                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td style="width: 120px;">{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
                                 <td>{{ pay[10] if pay[10] is not none }} </td>  
                             </tr>
                         {% endfor %}
                     {% else %}
                         {% for pay in payment %}
                             <tr>
-                                <td>{{ pay[0].strftime('%d-%m-%Y') }}</td>
+                                <td style="width: 120px;">{{ pay[0].strftime('%d-%m-%Y') }}</td>
                                 <td>${{ pay[1] }}</td>
                                 <td>{{ pay[2] if pay[2] is not none }} </td> 
                                 <td>{{ pay[3] }} {{ pay[4] }} {{ pay[5] }}</td>
                                 <td>{{ pay[6] if pay[6] is not none }} </td> 
                                 <td>{{ pay[7] if pay[7] is not none }} </td> 
                                 <td>{{ pay[8] if pay[8] is not none }} </td> 
-                                <td>{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
+                                <td style="width: 120px;">{{ pay[9].strftime('%d-%m-%Y') if pay[9] is not none }}</td>
                                 <td>{{ pay[10] if pay[10] is not none }} </td>   
                             </tr>
                         {% endfor %}

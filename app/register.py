@@ -90,15 +90,38 @@ def register():
             session['MonthlySubDiscount'] = float(result[1])
             session['AnnualSubFee'] = float(result[2])
             session['AnnualSubDiscount'] = float(result[3])
-            # (LINE78-90) The above session values are not being used in javascript - javascript still hard coded
-            # the float() function is not changing session values - they are still strings
-            # need to use parseInt/parseFloat in javascript to convert them
+
+            # Connect to MySQL database      
+            cursor, connection = getCursor()
+
+            # Execute the SQL query to get the subscription costs
+
+            # monthly fee
+            cursor.execute("SELECT subscription_cost FROM subscription WHERE subscription_type = 'M'")
+            monthly_fee_result = cursor.fetchone()
+            monthly_fee = float(monthly_fee_result[0]) if monthly_fee_result else None
             
+            # yearly discount
+            cursor.execute("SELECT subscription_cost FROM subscription WHERE subscription_type = 'Y'")
+            yearly_fee_result = cursor.fetchone()
+            yearly_fee = float(yearly_fee_result[0]) if yearly_fee_result else None
+
+            # monthly discount
+            cursor.execute("SELECT subscription_discount FROM subscription WHERE subscription_type = 'M'")
+            monthly_discount_result = cursor.fetchone()
+            monthly_discount = float(monthly_discount_result[0]) if monthly_discount_result else None
+
+            # yearly discount
+            cursor.execute("SELECT subscription_discount FROM subscription WHERE subscription_type = 'Y'")
+            yearly_discount_result = cursor.fetchone()
+            yearly_discount = float(yearly_discount_result[0]) if yearly_discount_result else None
+            
+
             flash(f'Account created successfully for {form.username.data}', category='success')
             closeConnection(cursor, connection)
 
             session['GID'] = GID
-            return render_template('payment_form.html')
+            return render_template('payment_form.html', monthly_fee=monthly_fee, yearly_fee=yearly_fee, monthly_discount=monthly_discount, yearly_discount=yearly_discount)
 
     return render_template('register.html', form=form, msg=msg)
 
@@ -106,6 +129,7 @@ def register():
 # payment
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
+    
     if request.method == 'POST':
         # obtain info from form
         subscription_type = request.form.get('subscriptionType')
@@ -115,7 +139,7 @@ def payment():
         # obtain saved GID value
         GID = session.get('GID')
 
-         # Connect to MySQL database      
+        # Connect to MySQL database      
         cursor, connection = getCursor()
 
         # Execute the SQL query to get the member_id using GID
@@ -154,6 +178,7 @@ def payment():
         closeConnection(cursor, connection)
 
         return render_template('payment_successful.html', subscription_type=subscription_type, expiry_date=expiry_date, subscription_cost=subscription_cost)
+    
     return render_template('payment_form.html')
 
 

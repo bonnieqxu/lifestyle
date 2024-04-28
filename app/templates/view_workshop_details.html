@@ -10,7 +10,24 @@
         </div>
     </div>
 </section>
-
+<style>
+    .img-placeholder {
+    width: 100px; /* Adjust width as needed */
+    height: 100px; /* Adjust height as needed */
+    }
+  </style>
+  
+  <script>
+  
+  function showImage(imageUrl) {
+      document.getElementById('popupImage').src = imageUrl;
+      document.getElementById('imagePopup').style.display = 'block';
+  }
+  
+  function closeImage() {
+      document.getElementById('imagePopup').style.display = 'none';
+  }
+  </script>
 <div class="container">
   <div class="text-center mb-3">
     <a href="{{ url_for('bookingpayment_workshop', workshop_id=workshop[0]) }}" class="btn btn-primary">Book Now</a>
@@ -21,7 +38,14 @@
             <tr><th>Tutor Name:</th><td>{{ workshop[3] }}</td></tr>
             <tr><th>Date:</th><td>{{ workshop[5].strftime('%d-%m-%Y') }}</td></tr>
             <tr><th>Time:</th><td>{{ workshop[6] }}</td></tr>
-            <tr><th>Location:</th><td>{{ workshop[7] }} {{ workshop[8] }}</td></tr>
+            <tr><th>Location:</th><td>{{ workshop[7] }} {{ workshop[8] if workshop[8] is not none }}
+              {% if workshop[10] is not none %}
+              <a href="#" onclick="showImage('{{ url_for('static', filename='images/' + workshop[10]) }}')">
+                  <i class='fa fa-map-marker'></i>
+                  View Map
+              </a>
+          {% endif %}
+            </td></tr>
             <tr><th>Workshop Detail:</th><td>{{ workshop[4] }}</td></tr>
             <tr><th>Cost:</th><td>${{ workshop[9] }}</td></tr>
         </tbody>
@@ -31,4 +55,9 @@
     <a href="{{ url_for('view_workshop_list') }}" class="btn btn-secondary">Go Back to Workshop List</a>
     </div>
   </div>
+  <div id="imagePopup" class="popup">
+    <span class="close" onclick="closeImage()">&times;</span>
+    <img id="popupImage" class="popup-content">
+  </div>
+  
 {% endblock %}

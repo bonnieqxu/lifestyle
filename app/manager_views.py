@@ -7,7 +7,7 @@ from app.utility import logged_in
 from app.forms import AddMemberForm, EditMemberForm, AddTutorForm, EditTutorForm, AddWorkshopTypeForm, AddaLessonForm, EditaLessonForm
 
 from app.forms import EditWorkshopTypeForm, EditTutorProfileForm, editPricesForm, AddLessonTypeForm, EditLessonTypeForm
-from app.forms import EditLocationForm, NewsForm, EditNewsForm,  AddLocationForm
+from app.forms import EditLocationForm, NewsForm, EditNewsForm,  AddLocationForm, EditMemberProfileForm
 import re, calendar
 from werkzeug.utils import secure_filename
 import os, uuid  # For generating unique identifiers
@@ -186,7 +186,7 @@ def manage_prices():
             (SELECT subscription_cost FROM subscription WHERE subscription_type = 'L') AS LessonFee;""")
     result = cursor.fetchone()
 
-
+    #we have to convert the prices to float before displaying them in the fields 
     form.annualsubfee.data = float(result[2])
     form.monthlysubfee.data = float(result[0])
     form.lessonfee.data = float(result[4])
@@ -199,7 +199,8 @@ def manage_prices():
 @app.route("/manage_workshop_prices", methods=['GET'])
 @logged_in
 def manage_workshop_prices():
-
+    #retrieve all the available workshops so that the manager can edit the workshops prices
+    #this list is to be sorted by ascending workshop date 
     cursor, connection = getCursor()
     cursor.execute( """
             SELECT 
@@ -208,7 +209,7 @@ def manage_workshop_prices():
                 wi.workshop_info_topic,
                 wi.workshop_info_desc AS workshop_detail,
                 w.workshop_date AS workshop_date,
-                w.workshop_time AS workshop_time,
+                TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
                 CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
                 w.workshop_cost AS workshop_cost,
                 w.workshop_cap_limit AS workshop_cap_limit,
@@ -231,7 +232,7 @@ def manage_workshop_prices():
 @app.route("/updateprices", methods=['POST'])
 @logged_in
 def updateprices():
-    #function will return all the prices 
+    #function will update all the subscription and lesson fee prices
     form=editPricesForm()
 
     monthlysubfee = form.monthlysubfee.data
@@ -255,8 +256,9 @@ def updateprices():
 @app.route("/updateworkshopprices", methods=['POST'])
 @logged_in
 def updateworkshopprices():
-    #function will return all the prices 
-    
+    #function will update all the workshop prices 
+    #the for loop will loop throught the entire form to get the workshop_id and the workshop price
+    #update statement will be triggered within each of the loop
     cursor, connection = getCursor()
     for key, value in request.form.items():
         if key.startswith('workshop_cost_'):
@@ -265,6 +267,8 @@ def updateworkshopprices():
             cursor.execute("""UPDATE workshop SET workshop_cost = %s WHERE workshop_id = %s;""", (workshop_cost, workshop_id,))
             connection.commit()
 
+    #once all the workshop prices are updated
+    #the list will be retrieved and the page will be repopulated
     cursor.execute( """
         SELECT 
             w.workshop_id AS workshop_id,
@@ -272,7 +276,7 @@ def updateworkshopprices():
             wi.workshop_info_topic,
             wi.workshop_info_desc AS workshop_detail,
             w.workshop_date AS workshop_date,
-            w.workshop_time AS workshop_time,
+            TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
             CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
             w.workshop_cost AS workshop_cost,
             w.workshop_cap_limit AS workshop_cap_limit,
@@ -304,11 +308,14 @@ def deletemember():
 
     member_id = int(request.form.get('memberID'))
 
+    #as there are foreign key of member_id in the payment table, we couldn't just delete the member from the member table
+    #we have to first delete the payment information of this member
+    #we will also have to delete this member from the user table
+    cursor.execute("""delete from payment where payment_payor_id = %s;""",
+            (member_id,))
+
     cursor.execute("""delete from member where member_id = %s;""",
             (member_id,))
-    
-    connection.commit()
-    closeConnection()
 
     cursor, connection = getCursor()
     cursor.execute("""delete from user where user_id = %s;""",
@@ -324,7 +331,8 @@ def deletemember():
 @app.route("/viewtutorlist", methods=['GET'])
 @logged_in
 def viewtutorlist():
-    #function will return all the members
+    #function will return all the tutors
+    #tutor user role is TT
     cursor, connection = getCursor()
     cursor.execute("""SELECT * FROM user a JOIN staff b ON a.user_id = b.staff_id 
                    LEFT OUTER JOIN image c ON a.user_id = c.user_id WHERE a.userrole = 'TT';""")
@@ -456,6 +464,7 @@ def deletetutor():
     connection.commit()
     closeConnection()
     cursor, connection = getCursor()
+    #we also need to delete the tutor from the user table
     cursor.execute("""delete from user where user_id = %s;""",
             (tutor_id,))
     
@@ -493,7 +502,6 @@ def deletelocation():
             (location_id,))
     
     connection.commit()
-    closeConnection()
     
     flash(f'Location deleted successfully', category='success')
 
@@ -575,7 +583,7 @@ def insertlessontype():
         connection.commit()
 
         flash(f'Lesson Type created successfully', category='success')
-        #once registration is successful, user will be routed to the login screen
+        #once create is successful, user will be routed to the lesson type list screen
         closeConnection()
         return redirect(url_for('viewlessontypelist'))
     elif request.method == 'POST':
@@ -603,13 +611,13 @@ def insertworkshoptype():
         connection.commit()
 
         flash(f'Workshop Type created successfully', category='success')
-        #once registration is successful, user will be routed to the login screen
+        #once create is successful, user will be routed to the workshop type list screen
         closeConnection()
         return redirect(url_for('viewworkshoptypelist'))
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+    # Show add workshop type form with message (if any)
     closeConnection()
     return render_template('add_workshop_type.html', title='Add New Workshop Type', form=form, msg=msg)
 
@@ -617,7 +625,7 @@ def insertworkshoptype():
 @app.route('/updateworkshoptype', methods=['POST'])
 @logged_in
 def updateworkshoptype():
-
+    #function to update workshop type
     msg=''
     form=EditWorkshopTypeForm()
     if form.validate_on_submit():
@@ -639,14 +647,13 @@ def updateworkshoptype():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
     closeConnection()
     return render_template('edit_workshop_type.html', title='Edit Workshop Type', form=form, msg=msg)
 
 @app.route('/updatelessontype', methods=['POST'])
 @logged_in
 def updatelessontype():
-
+    #function to update lesson type
     msg=''
     form=EditLessonTypeForm()
     if form.validate_on_submit():
@@ -668,7 +675,6 @@ def updatelessontype():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
     closeConnection()
     return render_template('edit_lesson_type.html', title='Edit Lesson Type', form=form, msg=msg)
 
@@ -765,7 +771,7 @@ def editmember(memberid):
 @app.route('/updatemember', methods=['POST'])
 @logged_in
 def updatemember():
-
+    #function to update member profile
     msg=''
     member_id = None
     form=EditMemberForm() 
@@ -801,7 +807,7 @@ def updatemember():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+    # Show edit member form with message (if any)
     closeConnection()
     return render_template('edit_member.html', title='Edit Member', form=form, msg=msg)
 
@@ -865,7 +871,7 @@ def editlocation(locationid):
 @app.route('/insertlocation', methods=['POST'])
 @logged_in
 def insertlocation():
-    #function to create a tutor
+    #function to create a location along with the map
     msg=''
     form=AddLocationForm()
     cursor, connection = getCursor()
@@ -880,7 +886,7 @@ def insertlocation():
                         (locationname, locationdesc, limit, ))
         connection.commit()
         
-        GID = cursor.lastrowid #retrieve the ID from lastrowid to be used as member_ID 
+        GID = cursor.lastrowid #retrieve the ID from lastrowid to be used as location_ID 
         # Save uploaded files to server and database
         if uploaded_files is not None:
             for idx, file in enumerate(uploaded_files):
@@ -895,20 +901,20 @@ def insertlocation():
                 connection.commit()
 
         flash(f'Location created successfully for {locationname}', category='success')
-        #once registration is successful, user will be routed to the login screen
+        #once create is successful, user will be routed to the view location list screen
         closeConnection()
         return redirect(url_for('viewlocationlist'))
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show location form with message (if any)
+    # Show location create form with message (if any)
     closeConnection()
     return render_template('add_location.html', title='Add New Location', form=form, msg=msg)
 
 @app.route('/updatelocation', methods=['POST'])
 @logged_in
 def updatelocation():
-    #function to edit guide
+    #function to edit location
     msg=''
     form=EditLocationForm()
     if form.validate_on_submit():
@@ -1035,14 +1041,14 @@ def inserttutor():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+    # Show add tutor form with message (if any)
     closeConnection()
     return render_template('add_tutor.html', title='Add New Tutor', form=form, msg=msg)
 
 @app.route('/updatetutor', methods=['POST'])
 @logged_in
 def updatetutor():
-    #function to edit guide
+    #function to edit tutor
     msg=''
     form=EditTutorForm()
     if form.validate_on_submit():
@@ -1103,7 +1109,7 @@ def updatetutor():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+    # Show edit tutor form with message (if any)
     closeConnection()
     return render_template('edit_tutor.html', title='Edit Tutor', form=form, msg=msg)
 
@@ -1115,20 +1121,41 @@ def updatetutor():
 def subscription_report():
     filter = request.form.get('filter')
     cursor, connection = getCursor()
-
+    #if the selected filter is expired
+    #return only the list of member with expired subscription
+    #the list will also include those who does not have a subscription
     if filter == "expired":
-        cursor.execute("SELECT * FROM member WHERE member_subscription_expiry_date < CURDATE()")
+        cursor.execute("""SELECT * FROM member WHERE member_subscription_expiry_date < CURDATE() ORDER BY 
+                        CASE 
+                            WHEN member_subscription_expiry_date IS NULL THEN 1 
+                            ELSE 0 
+                        END, 
+                        member_subscription_expiry_date ASC""")
         expired_members = cursor.fetchall()
         return render_template('subscription_report.html', filter="expired", expired_members=expired_members)
 
     elif filter == "near_to_expire":
+        #if the filter is near to expire
+        #return the list of members where the expiry date of subscription is 3 weeks away
         cursor.execute("""SELECT * FROM member WHERE member_subscription_expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 WEEK) 
-                       ORDER BY member_subscription_expiry_date ASC""")
+                       ORDER BY 
+                        CASE 
+                            WHEN member_subscription_expiry_date IS NULL THEN 1 
+                            ELSE 0 
+                        END, 
+                        member_subscription_expiry_date ASC""")
         near_to_expire_members = cursor.fetchall()
         return render_template('subscription_report.html', filter="near_to_expire", near_to_expire_members=near_to_expire_members)
 
     else:
-        cursor.execute("SELECT * FROM member")
+        #lastly if there is no filter
+        #return all of the members
+        cursor.execute("""SELECT * FROM member ORDER BY 
+                        CASE 
+                            WHEN member_subscription_expiry_date IS NULL THEN 1 
+                            ELSE 0 
+                        END, 
+                        member_subscription_expiry_date ASC""")
         members = cursor.fetchall()
         today = date.today()
         return render_template('subscription_report.html', members=members, today=today)
@@ -1138,6 +1165,7 @@ def subscription_report():
 @app.route("/workshop_report", methods=['GET'])
 @logged_in
 def workshop_report():
+    #retrieve all workshops order by the workshop with the most attendance
     cursor, connection =  getCursor()
     sql = """
             SELECT 
@@ -1146,8 +1174,8 @@ def workshop_report():
                 wi.workshop_info_topic AS workshop_topic,
                 wi.workshop_info_desc AS workshop_detail,
                 w.workshop_date AS workshop_date,
-                w.workshop_time AS workshop_time,
-                CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
+                TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+                CONCAT(l.location_name, ' ', COALESCE(l.location_description, '')) AS workshop_location,
                 w.workshop_cost AS workshop_cost,
                 w.workshop_cap_limit AS workshop_cap_limit,
                 w.workshop_attendance AS workshop_attendance
@@ -1164,19 +1192,215 @@ def workshop_report():
     cursor.execute(sql)
     workshops = cursor.fetchall()
 
+    #section below is data retrieved to be used in the graph
     workshop_titles = [workshop[2] for workshop in workshops]
     attendance_data = [workshop[9] for workshop in workshops]
-    time_formatted = [f"{workshop[5].seconds // 3600:02d}:{(workshop[5].seconds // 60) % 60:02d}" for workshop in workshops]
+    time_formatted = [workshop[5] for workshop in workshops]
     workshop_details = [f"Date: {workshop[4].strftime('%d-%m-%Y')}, Time: {time}, Tutor: {workshop[1]}" for workshop, time in zip(workshops, time_formatted)]
 
     return render_template('workshop_report.html', workshops=workshops, workshop_titles=workshop_titles, attendance_data=attendance_data, workshop_details=workshop_details)
+
+
+# view patterns report
+@app.route("/patterns_report", methods=['GET', 'POST'])
+@logged_in
+def patterns_report():
+    cursor, connection =  getCursor()
+
+    filter = request.form.get('filter')
+    show = ""
+    dateFrom = ""
+    dateTo = ""
+
+    if request.method == 'POST':
+        show = request.form.get('show')
+        dateFrom = request.form.get('start')
+        dateTo = request.form.get('end')
+
+    #check if the date from and date to is entered 
+    #if the user clicked on Show, then the sql needs to filter the dates
+    #below workshop and lesson sections retrieved information to be used in the graph
+    if show =="show":
+
+        sql = """
+        SELECT 
+            w.workshop_id AS workshop_id,
+            CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor,
+            wi.workshop_info_topic AS workshop_topic,
+            wi.workshop_info_desc AS workshop_detail,
+            w.workshop_date AS workshop_date,
+            TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+            CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
+            w.workshop_attendance AS workshop_attendance
+        FROM 
+            workshop w
+        INNER JOIN 
+            staff s ON w.workshop_tutor_id = s.staff_id
+        INNER JOIN 
+            workshop_info wi ON w.workshop_title_id = wi.workshop_info_id
+        INNER JOIN 
+            location l ON w.workshop_location = l.location_id
+        WHERE workshop_attendance > 0 and w.workshop_date between %s and %s
+        ORDER BY workshop_date asc;"""
+        cursor.execute(sql, (dateFrom, dateTo,))
+        workshops = cursor.fetchall()
+
+        sql = """
+        SELECT 
+            l.lesson_id AS lesson_id,
+            CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor,
+            li.lesson_info_type AS lesson_topic,
+            l.lesson_detail AS lesson_detail,
+            l.lesson_date AS lesson_date,
+            TIME_FORMAT(l.lesson_start_time, '%h:%i %p') AS lesson_time,
+           loc.location_name AS lesson_location,
+            l.lesson_attendance AS lesson_attendance
+        FROM 
+            lesson l
+        INNER JOIN 
+            staff s ON l.lesson_tutor_id = s.staff_id
+        INNER JOIN 
+            lesson_info li ON l.lesson_title_id = li.lesson_info_id
+        INNER JOIN 
+            location loc ON l.lesson_location = loc.location_id
+		WHERE lesson_attendance > 0 and l.lesson_date between %s and %s
+        ORDER BY lesson_date asc;"""
+        cursor.execute(sql, (dateFrom, dateTo,))
+        lessons = cursor.fetchall()
+
+    else:
+        sql = """
+            SELECT 
+                w.workshop_id AS workshop_id,
+                CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor,
+                wi.workshop_info_topic AS workshop_topic,
+                wi.workshop_info_desc AS workshop_detail,
+                w.workshop_date AS workshop_date,
+                TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+                CONCAT(l.location_name, ' ', l.location_description) AS workshop_location,
+                w.workshop_attendance AS workshop_attendance
+            FROM 
+                workshop w
+            INNER JOIN 
+                staff s ON w.workshop_tutor_id = s.staff_id
+            INNER JOIN 
+                workshop_info wi ON w.workshop_title_id = wi.workshop_info_id
+            INNER JOIN 
+                location l ON w.workshop_location = l.location_id
+            WHERE workshop_attendance > 0
+            ORDER BY workshop_attendance DESC;
+                """   
+        cursor.execute(sql)
+        workshops = cursor.fetchall()
+
+        sql = """
+        SELECT 
+            l.lesson_id AS lesson_id,
+            CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor,
+            li.lesson_info_type AS lesson_topic,
+            l.lesson_detail AS lesson_detail,
+            l.lesson_date AS lesson_date,
+            TIME_FORMAT(l.lesson_start_time, '%h:%i %p') AS lesson_time,
+           loc.location_name AS lesson_location,
+            l.lesson_attendance AS lesson_attendance
+        FROM 
+            lesson l
+        INNER JOIN 
+            staff s ON l.lesson_tutor_id = s.staff_id
+        INNER JOIN 
+            lesson_info li ON l.lesson_title_id = li.lesson_info_id
+        INNER JOIN 
+            location loc ON l.lesson_location = loc.location_id
+		WHERE lesson_attendance > 0
+        ORDER BY lesson_date asc;"""
+        cursor.execute(sql)
+        lessons = cursor.fetchall()
+
+    workshop_titles = [workshop[2] for workshop in workshops]
+    attendance_data = [workshop[7] for workshop in workshops]
+    time_formatted = [workshop[5] for workshop in workshops]
+    workshop_details = [f"Date: {workshop[4].strftime('%d-%m-%Y')}, Time: {time}, Tutor: {workshop[1]}" for workshop, time in zip(workshops, time_formatted)]
+
+    lesson_titles = [lesson[2] for lesson in lessons]
+    lesson_attendance_data = [lesson[7] for lesson in lessons]
+    lesson_time_formatted = [lesson[5] for lesson in lessons]
+    lesson_details = [f"Date: {lesson[4].strftime('%d-%m-%Y')}, Time: {time}, Tutor: {lesson[1]}" for lesson, time in zip(lessons, lesson_time_formatted)]
+
+
+    cursor, connection = getCursor()
+
+    #below workshop and lesson sections retrieved information to be used in the template
+    #there is 2 filters available to be checked
+    #1st is to filter by workshop and lesson
+    #2nd is to filter by the date from and date to
+    #in the where criteria, the bookings booked = true and lesson/workshop attendance > 0
+    if filter == "lesson":
+
+        if show =="show":
+            cursor.execute("""SELECT l.lesson_id, l.lesson_date, TIME_FORMAT(l.lesson_start_time, '%h:%i %p') AS formatted_start_time,
+                                li.lesson_info_type, l.lesson_detail, loc.location_name, loc.location_description, loc.location_map,
+                                loc.location_limit, l.lesson_tutor_id, (select count(*)  from booking where booking_lesson_id = l.lesson_id) as number_booked, 
+                                lesson_attendance
+                            FROM lesson l
+                            JOIN 
+                                lesson_info li ON l.lesson_title_id = li.lesson_info_id
+                            JOIN 
+                                location loc ON l.lesson_location = loc.location_id
+                            WHERE 
+                                l.lesson_booked = true and lesson_attendance > 0 and lesson_date between %s and %s order by lesson_date asc;""",(dateFrom, dateTo,))
+        else:
+            cursor.execute("""SELECT l.lesson_id, l.lesson_date, TIME_FORMAT(l.lesson_start_time, '%h:%i %p') AS formatted_start_time,
+                    li.lesson_info_type, l.lesson_detail, loc.location_name, loc.location_description, loc.location_map,
+                    loc.location_limit, l.lesson_tutor_id, (select count(*)  from booking where booking_lesson_id = l.lesson_id) as number_booked, 
+                    lesson_attendance
+                FROM lesson l
+                JOIN 
+                    lesson_info li ON l.lesson_title_id = li.lesson_info_id
+                JOIN 
+                    location loc ON l.lesson_location = loc.location_id
+                WHERE 
+                    l.lesson_booked = true and lesson_attendance > 0 order by lesson_date asc;""")
+        
+        lesson = cursor.fetchall()
+        return render_template('manager_patterns.html', filter="lesson", lesson=lesson, workshops=workshops, workshop_titles=workshop_titles, attendance_data=attendance_data, workshop_details=workshop_details,lessons=lessons, lesson_titles=lesson_titles, lesson_attendance_data=lesson_attendance_data, lesson_details=lesson_details)
+
+    else:
+
+        if show =="show":
+            cursor.execute("""SELECT l.workshop_id, l.workshop_date, TIME_FORMAT(l.workshop_time, '%h:%i %p') AS formatted_start_time,
+                                    li.workshop_info_topic, l.workshop_detail, loc.location_name, loc.location_description, loc.location_map,
+                                    l.workshop_cap_limit, l.workshop_tutor_id, (select count(*)  from booking where booking_workshop_id = l.workshop_id) as number_booked, 
+                                    workshop_attendance
+                                FROM workshop l
+                                JOIN 
+                                    workshop_info li ON l.workshop_title_id = li.workshop_info_id
+                                JOIN 
+                                    location loc ON l.workshop_location = loc.location_id
+                                WHERE workshop_attendance > 0 and workshop_date between %s and %s
+                                order by workshop_date asc;""",(dateFrom, dateTo,))
+        else: 
+            cursor.execute("""SELECT l.workshop_id, l.workshop_date, TIME_FORMAT(l.workshop_time, '%h:%i %p') AS formatted_start_time,
+                                li.workshop_info_topic, l.workshop_detail, loc.location_name, loc.location_description, loc.location_map,
+                                l.workshop_cap_limit, l.workshop_tutor_id, (select count(*)  from booking where booking_workshop_id = l.workshop_id) as number_booked, 
+                                workshop_attendance
+                            FROM workshop l
+                            JOIN 
+                                workshop_info li ON l.workshop_title_id = li.workshop_info_id
+                            JOIN 
+                                location loc ON l.workshop_location = loc.location_id
+                            WHERE workshop_attendance > 0 
+                            order by workshop_date asc;""")
+            
+        workshop = cursor.fetchall()
+        return render_template('manager_patterns.html', filter="workshop", workshop=workshop, workshops=workshops, workshop_titles=workshop_titles, attendance_data=attendance_data, workshop_details=workshop_details,lessons=lessons, lesson_titles=lesson_titles, lesson_attendance_data=lesson_attendance_data, lesson_details=lesson_details)
+
 
 
 @app.route('/newslist', methods=['GET', 'POST'])
 @logged_in
 def newslist():
     cursor, connection = getCursor()
-    cursor.execute("select * from news")
+    cursor.execute("SELECT * FROM news ORDER BY news_uploaded DESC")
     newslist = cursor.fetchall()
     closeConnection()
     return render_template("news_list.html", news_list = newslist)
@@ -1296,7 +1520,9 @@ def revenue():
     if request.method == 'POST':
         year = request.form['year']
         cursor, connection = getCursor()
-        # Execute the SQL query to get the member_id using GID
+        # Execute the SQL query to get the revenue filtered by year
+        #SQL query will perform the calculation and adding up of the payment_amount and sort them into corresponding revenuews
+        # it will also group the calculated payment amount into months 
         query = """SELECT 
                     months.month AS month,
                     COALESCE(SUM(CASE WHEN payment_subscription_id is not null THEN payment_amount ELSE 0 END), 0) AS subscription_revenue,
@@ -1313,6 +1539,7 @@ def revenue():
 
         revenue_report = {}
             
+        #below loop will sort the list into proper array to tbe easily displayed in the format that we wanted in the template
         for row in cursor.fetchall():
             month = row[0]
             month_name = calendar.month_name[month] 
@@ -1341,6 +1568,7 @@ def revenue():
 @logged_in
 def alltutorlessons():
     # function will return all the tutor lessons
+    # these will be all the upcoming lessons
     cursor, connection = getCursor()
     cursor.execute("""SELECT 
                 lesson.lesson_id,
@@ -1349,7 +1577,7 @@ def alltutorlessons():
                 CONCAT(staff.staff_title, ' ', staff.staff_firstname, ' ', staff.staff_familyname) AS tutor_name,
                 location.location_name AS location,
                 lesson.lesson_date AS Date,
-                lesson.lesson_start_time AS Time,
+                TIME_FORMAT(lesson.lesson_start_time, '%h:%i %p') AS Time,
                 CASE
                     WHEN lesson.lesson_booked = true THEN 'Yes'
                     ELSE 'No'
@@ -1392,18 +1620,13 @@ def deleteatutorlesson():
 
 
     # If there are bookings/payments, delete them first
-    if bookings or payments:
-        # If there are bookings/payments, delete them first
-        if bookings:
-            cursor.execute("""DELETE FROM booking WHERE booking_lesson_id = %s""", (lesson_id,))
-        if payments:
-            cursor.execute("""DELETE FROM payment WHERE payment_lesson_id = %s""", (lesson_id,))
+    if bookings:
+        cursor.execute("""DELETE FROM booking WHERE booking_lesson_id = %s""", (lesson_id,))
+    if payments:
+        cursor.execute("""DELETE FROM payment WHERE payment_lesson_id = %s""", (lesson_id,))
 
-    # if bookings or payments:
-    #     flash(f'Cannot delete lesson as there are associated bookings or payments.', category='error')
-    else:
-        cursor.execute("""DELETE FROM lesson WHERE lesson_id = %s""", (lesson_id,))
-        flash(f'Lesson deleted successfully', category='success')
+    cursor.execute("""DELETE FROM lesson WHERE lesson_id = %s""", (lesson_id,))
+    flash(f'Lesson deleted successfully', category='success')
     
     connection.commit()
     connection.close()
@@ -1492,7 +1715,8 @@ def insertalesson():
         lessontutor = form.tutor.data
 
         cursor, connection = getCursor()
-
+        #check for timetable clashes
+        #get the workshop and lesson of the tutor and the date and time from the new lesson to be created
         cursor.execute('select * from workshop where workshop_tutor_id = %s and workshop_date = %s and workshop_time=%s',
                             ( lessontutor, lessondate, lessonstarttime, ))
         workshop_clash = cursor.fetchone()
@@ -1516,13 +1740,12 @@ def insertalesson():
     elif request.method == 'POST':
         # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
+    # Show create lesson form with message (if any)
     connection.close()
     return render_template('manager_add_lesson.html', title='Add New Lesson', form=form, msg=msg)
 
 
 # edit a lesson
-
 @app.route("/editalesson/<lessonid>", methods=["GET"])
 @logged_in
 def editalesson(lessonid):
@@ -1612,7 +1835,7 @@ def updatealesson():
                    WHERE u.userrole = 'TT';""")
     tutors = cursor.fetchall()
 
-
+    # Create form and populate choices
     form.title.choices = [(str(title[0]), title[1]) for title in titles]
     form.location.choices = [(str(location[0]), location[1]) for location in locations]
     form.tutor.choices = [(str(tutor[0]), f"{tutor[1]} {tutor[2]} {tutor[3]}") for tutor in tutors]
@@ -1637,6 +1860,7 @@ def updatealesson():
                     ( tutor, lessondate, lessonstarttime, lesson_id, ))
         lesson_clash = cursor.fetchone()
 
+        #check if there is a timetable clash in workshop and lesson
         if workshop_clash is None and lesson_clash is None:
 
             cursor.execute("""UPDATE lesson SET lesson_title_id=%s,lesson_tutor_id=%s, lesson_location= %s, 
@@ -1662,7 +1886,7 @@ def manage_workshop_list():
     # Get the current date
     current_date = datetime.now().date()
 
-    # Function to retrieve and display the workshop list managed by the logged-in user
+    # Function to retrieve and display all the upcoming workshop list
     cursor, connection = getCursor()
     cursor.execute("""
         SELECT 
@@ -1672,11 +1896,12 @@ def manage_workshop_list():
             CONCAT(s.staff_title, ' ',s.staff_firstname, ' ', s.staff_familyname) AS tutor_name,
             w.workshop_detail,
             w.workshop_date,
-            w.workshop_time,
+            TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
             l.location_name,
             l.location_description AS workshop_location,
             w.workshop_cost,
-            w.workshop_cap_limit
+            w.workshop_cap_limit,
+            l.location_map
         FROM 
             workshop w
         JOIN 
@@ -1706,7 +1931,7 @@ def manage_weekly_workshop_list():
     # Calculate end date for filtering (7 days from now)
     end_date = current_date + timedelta(days=7)
 
-    # Function to retrieve and display the workshop list managed by the logged-in user
+    # Function to retrieve and display all the upcoming workshop list
     cursor, connection = getCursor()
     cursor.execute("""
         SELECT 
@@ -1716,11 +1941,12 @@ def manage_weekly_workshop_list():
             CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor_name,
             w.workshop_detail,
             w.workshop_date,
-            w.workshop_time,
+            TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
             l.location_name,
             l.location_description AS workshop_location,
             w.workshop_cost,
-            w.workshop_cap_limit
+            w.workshop_cap_limit,
+            l.location_map
         FROM 
             workshop w
         JOIN 
@@ -1741,7 +1967,7 @@ def manage_weekly_workshop_list():
     return render_template("manage_weekly_workshop_list.html", workshop_list=workshop_list)
 
 @app.route('/addworkshop', methods=['GET', 'POST'])
-@logged_in  # Ensure your logged_in decorator is correctly defined to protect this route
+@logged_in 
 def add_workshop():
     if request.method == 'POST':
         workshop_topic = request.form['workshop_topic']
@@ -1817,7 +2043,7 @@ def edit_workshop(workshop_id):
                 CONCAT(s.staff_title, ' ', s.staff_firstname, ' ', s.staff_familyname) AS tutor_name,
                 w.workshop_detail,
                 w.workshop_date,
-                w.workshop_time,
+                TIME_FORMAT(w.workshop_time, '%H:%i') AS workshop_time,
                 l.location_name,
                 l.location_description AS workshop_location,
                 w.workshop_cost,
@@ -1945,6 +2171,7 @@ def trackpayment():
     filter = request.form.get('filter')
     cursor, connection = getCursor()
 
+    #payment reports can be filtered by lesson/workshop/subscription
     if filter == "lesson":
         cursor.execute("""select payment_date, payment_amount, 
                                 CASE
@@ -1988,6 +2215,7 @@ def trackpayment():
         return render_template('manage_payment.html', filter="subscription", subscription=subscription)
 
     else:
+        #default is to select all payments
         cursor.execute("""select payment_date, payment_amount, 
                                 CASE
                                         WHEN payment_workshop_id IS NOT NULL THEN 'Workshop'
@@ -2007,7 +2235,7 @@ def trackpayment():
 def trackattendance():
     filter = request.form.get('filter')
     cursor, connection = getCursor()
-
+    #select lessons and workshops which has been booked
     if filter == "lesson":
         cursor.execute("""SELECT l.lesson_id, l.lesson_date, TIME_FORMAT(l.lesson_start_time, '%h:%i %p') AS formatted_start_time,
                             li.lesson_info_type, l.lesson_detail, loc.location_name, loc.location_description, loc.location_map,
@@ -2043,10 +2271,10 @@ def viewlessonattendance(lesson_id):
     #function will return all the booking made for this lesson
     cursor, connection = getCursor()
     cursor.execute("""select booking_id, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS formatted_start_time, b.member_title, b.member_firstname, 
-                   b.member_familyname, member_position, member_email, member_address, member_dob
+                   b.member_familyname, member_position, member_email, member_address, member_dob, booking_attended
                    from booking a, member b, lesson d
                    where a.booking_member_id = b.member_id and a.booking_lesson_id = d.lesson_id and 
-                    d.lesson_booked=true and booking_attended is null and booking_lesson_id = %s """, (lesson_id,))
+                   booking_lesson_id = %s """, (lesson_id,))
     bookinglist = cursor.fetchall()
 
     cursor.execute("""select lesson_info_type, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS formatted_start_time
@@ -2071,10 +2299,10 @@ def viewworkshopattendance(workshop_id):
     #function will return all the booking made for this workshop
     cursor, connection = getCursor()
     cursor.execute("""select booking_id, workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS formatted_start_time, b.member_title, b.member_firstname, 
-                   b.member_familyname, member_position, member_email, member_address, member_dob
+                   b.member_familyname, member_position, member_email, member_address, member_dob, booking_attended
                    from booking a, member b, workshop d
                    where a.booking_member_id = b.member_id and a.booking_workshop_id = d.workshop_id and 
-                   booking_attended is null and booking_workshop_id = %s """, (workshop_id,))
+                    booking_workshop_id = %s """, (workshop_id,))
     bookinglist = cursor.fetchall()
 
     cursor.execute("""select workshop_info_topic, workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS formatted_start_time
@@ -2098,44 +2326,46 @@ def viewworkshopattendance(workshop_id):
 @app.route('/updateattendance', methods=['POST'])
 @logged_in
 def updateattendance():
-    #function to delete member
-    #member ID retrieved from caller form
-    #caller: memberlist.html
+    #function to update attendance 
+    #booking ID retrieved from caller form
+    #caller: manager_mark_attendance.html
     cursor, connection = getCursor()
 
-    booking_id = int(request.form.get('bookingID'))
+    checked_values = request.form.getlist('checkbox')
     type = request.form.get('type')
 
-    cursor.execute("""update booking set booking_attended = 1 where booking_id = %s;""",
-            (booking_id,))
+    #loop through all the list of bookings to get the booking_id
+    #check if the list is from workshop or lesson
+    #update the attendance count respectively
+    for value in checked_values:
 
-    if type == "Workshop":
-        workshop_id = int(request.form.get('workshopID'))
-        cursor.execute("""update workshop set workshop_attendance = CASE 
-                            WHEN workshop_attendance IS NULL THEN 1 
-                            ELSE workshop_attendance + 1 
-                        END where workshop_id = %s;""",
-                (workshop_id,))
-        
-        connection.commit()
-        connection.close()
-        flash(f'Attendance checked successfully', category='success')
-        return redirect(url_for("trackattendance")) 
+        if value:
+            booking_id = int(value)
 
+            cursor.execute("""update booking set booking_attended = 1 where booking_id = %s;""",
+                (booking_id,))
 
-    if type == "Lesson":
-        lesson_id = int(request.form.get('lessonID'))
-        cursor.execute("""update lesson set lesson_attendance = CASE 
-                            WHEN lesson_attendance IS NULL THEN 1 
-                            ELSE lesson_attendance + 1 
-                        END where lesson_id = %s;""",
-                (lesson_id,))
-        
-        connection.commit()
+            if type == "Workshop":
+                workshop_id = int(request.form.get('workshopID'))
+                cursor.execute("""update workshop set workshop_attendance = CASE 
+                                    WHEN workshop_attendance IS NULL THEN 1 
+                                    ELSE workshop_attendance + 1 
+                                END where workshop_id = %s;""",
+                        (workshop_id,))               
 
-        connection.close()
-        flash(f'Attendance checked successfully', category='success')
-        return redirect(url_for("trackattendance")) 
+            if type == "Lesson":
+                lesson_id = int(request.form.get('lessonID'))
+                cursor.execute("""update lesson set lesson_attendance = CASE 
+                                    WHEN lesson_attendance IS NULL THEN 1 
+                                    ELSE lesson_attendance + 1 
+                                END where lesson_id = %s;""",
+                        (lesson_id,))
+            
+    connection.commit()
+
+    connection.close()
+    flash(f'Attendance checked successfully', category='success')
+    return redirect(url_for("trackattendance")) 
         
 @app.route('/check_availability', methods=['POST'])
 @logged_in
@@ -2146,6 +2376,7 @@ def check_availability():
     workshop_date = request_data.get('workshopDate')
     start_time = request_data.get('startTime')
     # Execute the SQL query
+    # Query will return all the tutors that is available within the timeslot selected
     sql_query = """
         SELECT CONCAT(staff_title, ' ', staff_firstname, ' ', staff_familyname) AS tutor_name
         FROM staff a, user b 
@@ -2170,4 +2401,94 @@ def check_availability():
     available_tutors = cursor.fetchall()
 
     return jsonify(available_tutors)
+
+
+# view the member Profile that booked the tutor lesson
+@app.route('/subscriptionreportviewmember/<memberid>', methods=['GET'])
+@logged_in
+def subscriptionreportviewmember(memberid):
+
+    viewonly=True
+    form = EditMemberProfileForm()
+
+    cursor, connection = getCursor()
+    cursor.execute('SELECT * FROM member WHERE member_id = %s', (memberid,) )
+    profile = cursor.fetchone()
+
+    form.title.data = profile[1]
+    form.firstname.data = profile[2]
+    form.lastname.data = profile[3]
+    membername = profile[2] + ' ' + profile[3]
+    form.position.data = profile[4]
+    form.phone.data = profile[5]
+    form.email.data = profile[6]
+    form.address.data = profile[7]
+    form.dob.data = profile[8]
+
+    #retrieve tutor image from image table
+    cursor, connection = getCursor()
+    cursor.execute('select * from image where user_id = %s', (memberid,))
+    imagelist = cursor.fetchall()
+    form.images.choices =  [(image[2]) for image in imagelist]
+
+    closeConnection()
+    return render_template("subscription_report_view_member.html", form=form, member_id=memberid, membername=membername)
+
+
+@app.route("/viewlessonattendancepatterns/<int:lesson_id>", methods=["GET"])
+@logged_in
+def viewlessonattendancepatterns(lesson_id):
+    #function will return all the attendance for this lesson
+    cursor, connection = getCursor()
+    cursor.execute("""select booking_id, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS formatted_start_time, b.member_title, b.member_firstname, 
+                   b.member_familyname, member_position, member_email, member_address, member_dob, lesson_booked
+                   from booking a, member b, lesson d
+                   where a.booking_member_id = b.member_id and a.booking_lesson_id = d.lesson_id and 
+                   booking_lesson_id = %s """, (lesson_id,))
+    bookinglist = cursor.fetchall()
+
+    cursor.execute("""select lesson_info_type, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS formatted_start_time
+                    from lesson a, lesson_info b
+                    where a.lesson_title_id = b.lesson_info_id and lesson_id = %s """, (lesson_id,))
+    lesson_info = cursor.fetchone()
+
+    topic = lesson_info[0]
+    date = lesson_info[1]
+    date = date.strftime('%d-%m-%Y')
+    starttime = lesson_info[2]
+    type = "Lesson"
+
+    cursor.close()
+    connection.close()
+
+    return render_template("manager_patterns_members.html", bookinglist = bookinglist, lessonID = lesson_id, topic=topic, date=date, starttime=starttime, type=type)
+
+@app.route("/viewworkshopattendancepatterns/<int:workshop_id>", methods=["GET"])
+@logged_in
+def viewworkshopattendancepatterns(workshop_id):
+    #function will return all the attendance made for this workshop
+    cursor, connection = getCursor()
+    cursor.execute("""select booking_id, workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS formatted_start_time, b.member_title, b.member_firstname, 
+                   b.member_familyname, member_position, member_email, member_address, member_dob, booking_attended
+                   from booking a, member b, workshop d
+                   where a.booking_member_id = b.member_id and a.booking_workshop_id = d.workshop_id and 
+                   booking_attended > 0 and booking_workshop_id = %s """, (workshop_id,))
+    bookinglist = cursor.fetchall()
+
+    cursor.execute("""select workshop_info_topic, workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS formatted_start_time
+                    from workshop a, workshop_info b
+                    where a.workshop_title_id = b.workshop_info_id and workshop_id = %s """, (workshop_id,))
+    workshop_info = cursor.fetchone()
+
+    topic = workshop_info[0]
+    date = workshop_info[1]
+    date = date.strftime('%d-%m-%Y')
+    starttime = workshop_info[2]
+    type = "Workshop"
+
+    cursor.close()
+    connection.close()
+
+    return render_template("manager_patterns_members.html", bookinglist = bookinglist, workshopID = workshop_id, topic=topic, date=date, starttime=starttime, type=type)
+
 

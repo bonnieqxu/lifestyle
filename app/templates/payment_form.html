@@ -15,6 +15,16 @@
     AnnualSubDiscount = parseInt(AnnualSubDiscount);
 </script>
 
+<style>
+    body {
+        background-image: url('/static/background2.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-color: rgba(200, 200, 200, 0.1);
+    }
+</style>
+
 <div class="container">
     <h1 class="text-center">Thank You For Signing Up.</h1>
     <h4 class="text-center"> Your Request Has Been Successfully Fulfilled</h4>
@@ -29,7 +39,7 @@
                         <img src="{{ url_for('static', filename='annual.png') }}" alt="Annual Subscription Image" class="card-img-top"> 
                         <div class="card-body">
                             <h2 class="card-title">Annual Subscription</h2>
-                            <h5>$50/year</h5>
+                            <h5>${{ yearly_fee }}/year</h5>
                             <input type="radio" id="annualSubscription" name="subscriptionType" value="annual" required>
                             <label for="annualSubscription">Select</label>
                         </div>
@@ -40,7 +50,7 @@
                         <img src="{{ url_for('static', filename='monthly.png') }}" alt="Monthly Payment Image" class="card-img-top"> 
                         <div class="card-body">
                             <h2 class="card-title">Monthly Subscription</h2>
-                            <h5>$5/month</h5>
+                            <h5>${{ monthly_fee }}/month</h5>
                             <input type="radio" id="monthlySubscription" name="subscriptionType" value="monthly" required>
                             <label for="monthlySubscription">Select</label>
                         </div>
@@ -51,7 +61,13 @@
         <div class="form-group" style="display: flex; justify-content: center; align-items: center; width: 100%;">
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="discountCheckbox" id="discountCheckbox">
-                <label class="form-check-label" for="discountCheckbox">Please tick the box if you are a student or a pensioner (30% discount applies)</label>
+                <label class="form-check-label" for="discountCheckbox" id="discountLabel">
+                    Please tick the box if you are a student or a pensioner (Discount applies) <br>
+                    <ul>
+                        <li>Enjoy {{ yearly_discount }}% off for an Annual subscription</li>
+                        <li>Enjoy {{ monthly_discount }}% off for a Monthly subscription</li>                       
+                    </ul>
+                </label>
             </div>
         </div>
         <div class="form-group" style="text-align: center;">
@@ -140,9 +156,8 @@
         var subscriptionType = document.querySelector('input[name="subscriptionType"]:checked').value;
         console.log(MonthlySubFee);
         var amountDue = (subscriptionType === 'annual') ? AnnualSubFee : MonthlySubFee; // Default prices for annual and monthly subscriptions
-        // if (document.getElementById('discountCheckbox').checked) {
-        //     amountDue *= 0.7; // Apply 30% discount for students or retirees
-        // }
+        
+        
         if (document.getElementById('discountCheckbox').checked) {
             if (subscriptionType === 'annual') {
                 amountDue *= (100 - AnnualSubDiscount) * 0.01; // Apply annual subscription discount

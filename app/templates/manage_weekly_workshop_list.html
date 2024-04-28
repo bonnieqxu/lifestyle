@@ -10,8 +10,24 @@
         </div>
     </div>
 </section>
+<style>
+    .img-placeholder {
+    width: 100px; /* Adjust width as needed */
+    height: 100px; /* Adjust height as needed */
+    }
+  </style>
+  
+  <script>
+  
+  function showImage(imageUrl) {
+      document.getElementById('popupImage').src = imageUrl;
+      document.getElementById('imagePopup').style.display = 'block';
+  }
+  
+  function closeImage() {
+      document.getElementById('imagePopup').style.display = 'none';
+  }
 
-<script>
     function deleteWorkshop(workshopID) {
         var confirmation = confirm("Are you sure you want to delete this workshop?");
         if (confirmation) {
@@ -50,7 +66,13 @@
                         <td>{{ workshop[6] }}</td>
                         <td>{{ workshop[1] }}</td>
                         <td>{{ workshop[3] }}</td>
-                        <td>{{ workshop[7] }}</td>
+                        <td>{{ workshop[7] }} {{workshop[8] if workshop[8] is not none }}
+                            {% if workshop[11] is not none %}
+                            <a href="#" onclick="showImage('{{ url_for('static', filename='images/' + workshop[11]) }}')">
+                                <i class='fa fa-map-marker'></i>
+                                View Map
+                            </a>
+                        {% endif %}</td>
                         <td>$ {{ workshop[9] }}</td>
                         <td>{{ workshop[10] }}</td>
                         <td><a href="/editworkshop/{{ workshop[0] }}">View/Edit</a></td>
@@ -61,6 +83,10 @@
         </div>
     </div>
 </div>
+<div id="imagePopup" class="popup">
+    <span class="close" onclick="closeImage()">&times;</span>
+    <img id="popupImage" class="popup-content">
+  </div>
 <!-- Hidden form for deletion -->
 <form id="deleteForm" action="/deleteworkshop" method="POST">
     <input type="hidden" name="workshopID" id="workshopID">

@@ -1,0 +1,30 @@
+{% extends 'home_page.html' %}
+
+{% block title %}Subscription Renewal Successful{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center" style="height: 50vh;">
+        <section class="tm-section-intro">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <div class="tm-wrapper-center text-center">
+                    <h1 class="tm-section-intro-title">Thank you for your payment</h1>
+                    <br>
+                    <h4> You have paid <span style="color: red;">${{ payment_amount }}</span> for your subscription renewal</h4>
+                    <hr>
+                    <p class="tm-section-intro-text">You will be re-directed back to the Subscription page...</p>
+                    <p class="tm-section-intro-text">In 10 seconds...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    setTimeout(function() {
+        window.location.href = "{{ url_for('member_subscription') }}";
+    }, 10000);  // 10 seconds
+</script>
+
+{% endblock content%}

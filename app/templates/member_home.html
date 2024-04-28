@@ -12,93 +12,117 @@
     <div class="container-fluid">
         <!-- Member Dashboard -->
         <div class="row">
-            <div class="col-12">
-               
+            <div class="col-12 text-center">
+                <br><br>
+                <p style="font-size: 2rem; font-weight: bold;">Welcome! {{ userfullname }} 😊</p>
+                <br><br>
             </div>
-            <div class="col-12">
-                <p>Welcome, {{ userfullname }}</p>
-            </div>
+            
             {% if image is not none %}
-            <div class="col-12">
+            <div class="col-12  text-center">
                 <img src="{{ url_for('static', filename='images/' + image) }}" alt="User Image" style="width: 100px; height: 100px;">
+            <br><br><br>
             </div>
             {% endif %}
         </div>
-            <div class="col-md-6 col-xl-3 mb-4">
-                <div class="card shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Class Information 
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month }}</div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card shadow mb-4">                       
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between  bg-warning">
+                            <h6 class="m-0 font-weight-bold">Manage My Account </h6>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <ul class="nav flex-column">
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('member_profile') }}" class="nav-link">
+                                        <i class="fas fa-user nav-icon  mr-2"></i>
+                                        Change My Information 
+                                    </a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a href="{{url_for('returnchangepassword')}}" class="nav-link">
+                                        <i class="fas fa-lock nav-icon  mr-2"></i>
+                                        Change My Password 
+                                    </a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('member_subscription') }}" class="nav-link">
+                                        <i class="fas fa-cog nav-icon  mr-2"></i>
+                                        Manage My Subscription 
+                                    </a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Repeat for other cards -->
-            
-            <!-- Chart Area -->
-            <div class="col-xl-8 col-lg-7">
-                <div class="card shadow mb-4">
-                    <!-- Card Header - Dropdown -->
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary"> LESSON </h6>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="card-body">
-                        <div class="chart-area">
-                            <canvas id="earningsOverviewChart"></canvas>
+
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card shadow mb-4">
+                        <!-- Card Header - Dropdown -->
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-warning">
+                            <h6 class="m-0 font-weight-bold"> Manage My Events </h6>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <ul class="nav flex-column">
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('show_booked_lesson') }}" class="nav-link">
+                                        <i class="fas fa-book nav-icon  mr-2"></i>
+                                        My Lessons
+                                    </a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('show_booked_workshop') }}" class="nav-link">
+                                        <i class="fas fa-tools nav-icon  mr-2"></i> 
+                                        My Workshop 
+                                    </a>
+                                    </li>                                  
+                                </ul>                             
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-<!-- Workshop List -->
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">WORKSHOP</h6>
-            </div>
-            <!-- Card Body -->
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-primary">
-                            <tr>
-                                <th>Topic</th>
-                                <th>Description</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Location</th>
-                                <th>Cost</th>
                 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for workshop in booked_workshop %}
-                            <tr>
-                
-                                <td>{{ workshop[1] }}</td>
-                                <td>{{ workshop[2] }}</td>
-                                <td>{{ workshop[4] .strftime('%d-%m-%Y') }}</td>
-                                <td>{{ workshop[5] }}</td>
-                                <td>{{ workshop[6] }}{{ workshop[7] }}</td>
-                                <td>{{ workshop[8] }}</td>
-                
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card shadow mb-4">
+                        <!-- Card Header - Dropdown -->
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between  bg-warning">
+                            <h6 class="m-0 font-weight-bold"> Browse Events and News </h6>
+                        </div>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <ul class="nav flex-column">
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('view_tutor_list') }}" class="nav-link">
+                                        <i class="fas fa-chalkboard-teacher mr-2"></i>
+                                        Tutors and their Lessons
+                                    </a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a href="{{ url_for('view_workshop_list') }}" class="nav-link">
+                                        <i class="fas fa-tools mr-2"></i>
+                                        Workshops 
+                                    </a>
+                                    </li>
+                                    <li class="nav-item">
+                                    <a href="{{url_for('newslist')}}" class="nav-link">
+                                        <i class="fas fa-newspaper mr-2"></i>
+                                        News 
+                                    </a>
+                                    </li>
+                                </ul>                               
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        
 
 {% endblock %}

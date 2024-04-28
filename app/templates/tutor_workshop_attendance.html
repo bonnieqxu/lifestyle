@@ -23,17 +23,19 @@
                 <th>Workshop Title</th>
                 <th>Workshop Detail</th>
                 <th>Workshop Location</th>
-                <th>Workshop Attendance</th>
+                <th>Member Booked</th>
+                <th>Member Attended</th>
                 <th>Attendance Check</th>
             </tr>
             {% for tutorworkshopbooking in tutorworkshopbookinglist %}
                 <tr>
-                    <td>{{ tutorworkshopbooking[0].strftime('%d-%m-%Y')  if tutorworkshopbooking[0] is not none }}</td>
-                    <td>{{ tutorworkshopbooking[1] if tutorworkshopbooking[1] is not none }}</td>
+                    <td style="width: 120px;">{{ tutorworkshopbooking[0].strftime('%d-%m-%Y')  if tutorworkshopbooking[0] is not none }}</td>
+                    <td style="width: 100px;">{{ tutorworkshopbooking[1] if tutorworkshopbooking[1] is not none }}</td>
                     <td>{{ tutorworkshopbooking[4] if tutorworkshopbooking[4] is not none }} </td>
                     <td>{{ tutorworkshopbooking[5] if tutorworkshopbooking[5] is not none }} </td>
-                    <td>{{ tutorworkshopbooking[2]}} {{ tutorworkshopbooking[3]}}</td>
+                    <td>{{ tutorworkshopbooking[2]}} {{ tutorworkshopbooking[3] if tutorworkshopbooking[3] is not none }}</td>
                     <td>{{ tutorworkshopbooking[7] if tutorworkshopbooking[7] is not none }} </td>
+                    <td>{{ tutorworkshopbooking[8] if tutorworkshopbooking[8] is not none }} </td>
                     <td>
                         <a href="{{ url_for('viewmemberworkshop', workshop_id=tutorworkshopbooking[6]) }}" class="btn btn-primary">Mark</a>
                 </tr>

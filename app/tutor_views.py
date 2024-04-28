@@ -39,6 +39,7 @@ def closeConnection(conn_param=None):
         # Handle the case when conn_param is None
         pass
 
+# tutor dashboard
 @app.route('/tutor_home')
 @logged_in
 def tutor_home():
@@ -55,6 +56,7 @@ def tutor_home():
     if image_data:
         image = image_data[2]
 
+    #Fetch users full name to be used in the welcome message
     cursor.execute("""SELECT CONCAT(staff_title, ' ', staff_firstname, ' ', staff_familyname) 
                     AS userfullname FROM staff WHERE staff_id = %s""", (session['id'],))
     userfullname = cursor.fetchone()[0]
@@ -71,13 +73,19 @@ def tutor_home():
 @logged_in
 def viewtutormemberprofile(memberid):
 
+    #viewonly parameter set to True for readonly
+    #reuse of member_views.html
     viewonly=True
     form = EditMemberProfileForm()
 
+    # Get cursor and connection
     cursor, connection = getCursor()
+
+    # Retrieve member details from the database
     cursor.execute('SELECT * FROM member WHERE member_id = %s', (memberid,) )
     profile = cursor.fetchone()
 
+    # Populate form fields with member details
     form.title.data = profile[1]
     form.firstname.data = profile[2]
     form.lastname.data = profile[3]
@@ -101,9 +109,9 @@ def viewtutormemberprofile(memberid):
 @app.route('/viewtutorlessonlist')
 @logged_in
 def viewtutorlessonlist():
-    #function will return all the workshop type
+    #function will return all lessons which belongs to the current tutor
     cursor, connection = getCursor()
-    cursor.execute("""select lesson_id, lesson_title_id, lesson_date, lesson_start_time, location_name, location_description, 
+    cursor.execute("""select lesson_id, lesson_title_id, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS lesson_start_time , location_name, location_description, 
                     lesson_info_type, lesson_detail from lesson a, lesson_info b, location c where a.lesson_title_id = b.lesson_info_id 
                    and a.lesson_location = c.location_id and lesson_tutor_id = %s and a.lesson_booked = false
                    order by lesson_date, lesson_start_time asc """, (session['id'],))
@@ -117,14 +125,14 @@ def viewtutorlessonlist():
 @app.route('/viewtutorlessonbookinglist')
 @logged_in
 def viewtutorlessonbookinglist():
-    #function will return all the workshop type
+    #function will return all the lessons booked which belongs to the current tutor
     cursor, connection = getCursor()
-    cursor.execute("""select booking_member_id, lesson_date, lesson_start_time, b.member_title, b.member_firstname, 
+    cursor.execute("""select booking_member_id, lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS lesson_start_time, b.member_title, b.member_firstname, 
                    b.member_familyname, e.location_name, lesson_info_type, lesson_detail
                    from booking a, member b, lesson_info c, lesson d, location e
                    where a.booking_member_id = b.member_id and d.lesson_title_id = c. lesson_info_id 
                    and a.booking_lesson_id = d.lesson_id and d.lesson_location = e.location_id and
-                    d.lesson_booked=true and booking_staff_id = %s 
+                    d.lesson_booked=true and lesson_date > curdate() and booking_staff_id = %s 
                    order by lesson_date asc """, (session['id'],))
     tutorlessonbookinglist = cursor.fetchall()
     cursor.close()
@@ -135,15 +143,15 @@ def viewtutorlessonbookinglist():
 @app.route('/marktutorlessonattendancelist')
 @logged_in
 def marktutorlessonattendancelist():
-    #function will return all the workshop type
+    #function will return all booked lessons for the tutor to mark attendance
     cursor, connection = getCursor()
-    cursor.execute("""select booking_id,  lesson_date, lesson_start_time, b.member_title, b.member_firstname, 
-                   b.member_familyname, e.location_name, lesson_info_type, lesson_detail, lesson_id
+    cursor.execute("""select booking_id,  lesson_date, TIME_FORMAT(lesson_start_time, '%h:%i %p') AS lesson_start_time, b.member_title, b.member_firstname, 
+                   b.member_familyname, e.location_name, lesson_info_type, lesson_detail, lesson_id,  (select count(*)  from booking where booking_lesson_id = lesson_id) as number_booked,lesson_attendance
                    from booking a, member b, lesson_info c, lesson d, location e
                    where a.booking_member_id = b.member_id and d.lesson_title_id = c.lesson_info_id 
                    and a.booking_lesson_id = d.lesson_id and d.lesson_location = e.location_id and
                    d.lesson_booked=true 
-                   and lesson_attendance is null and booking_staff_id = %s 
+                   and booking_staff_id = %s 
                    order by lesson_date asc """, (session['id'],))
     tutorlessonbookinglist = cursor.fetchall()
     cursor.close()
@@ -154,10 +162,10 @@ def marktutorlessonattendancelist():
 @app.route('/marktutorworkshopattendancelist')
 @logged_in
 def marktutorworkshopattendancelist():
-    #function will return all the workshop type
+    #function will return all booked lessons for the tutor to mark attendance
     cursor, connection = getCursor()
-    cursor.execute("""select workshop_date, workshop_time, e.location_name, e.location_description, 
-                   workshop_info_topic, workshop_detail, workshop_id, workshop_attendance
+    cursor.execute("""select workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS workshop_time, e.location_name, e.location_description, 
+                   workshop_info_topic, workshop_detail, workshop_id, (select count(*)  from booking where booking_workshop_id = d.workshop_id) as number_booked, workshop_attendance
                    from workshop_info c, workshop d, location e
                    where c.workshop_info_id = d.workshop_title_id
                    and d.workshop_location = e.location_id and workshop_tutor_id = %s 
@@ -171,44 +179,67 @@ def marktutorworkshopattendancelist():
 @app.route('/viewmemberworkshop/<int:workshop_id>', methods=['GET'])
 @logged_in
 def viewmemberworkshop(workshop_id):
-    #function will return all the workshop type
+    #function will return all the members who booked the workshop
     cursor, connection = getCursor()
+    # Retrieve member workshop booking details from the database
     cursor.execute("""select booking_id,  b.member_title, b.member_firstname, b.member_familyname, b.member_position,
                    b.member_phonenumber, b.member_email, b.member_address, b.member_dob, 
-	                b. member_id, workshop_id, workshop_attendance
+	                b. member_id, workshop_id, workshop_attendance, booking_attended
                    from booking a, member b, workshop_info c, workshop d, location e
                    where a.booking_member_id = b.member_id and d.workshop_title_id = c. workshop_info_id 
-                   and (a.booking_attended = 0 or booking_attended is null) and a.booking_workshop_id = d.workshop_id and d.workshop_location = e.location_id 
+                   and a.booking_workshop_id = d.workshop_id and d.workshop_location = e.location_id 
                    and workshop_id = %s """, (workshop_id,))
     memberworkshopbookinglist = cursor.fetchall()
+
+    # Retrieve workshop information
+    cursor.execute("""select workshop_info_topic, workshop_date, TIME_FORMAT(workshop_time, '%h:%i %p') AS formatted_start_time
+                    from workshop a, workshop_info b
+                    where a.workshop_title_id = b.workshop_info_id and workshop_id = %s """, (workshop_id,))
+    workshop_info = cursor.fetchone()
+
+    topic = workshop_info[0]
+    date = workshop_info[1]
+    date = date.strftime('%d-%m-%Y')
+    starttime = workshop_info[2]
+
     cursor.close()
     connection.close()
 
-    return render_template("tutor_member_workshop_list.html", memberworkshopbookinglist = memberworkshopbookinglist)
+    return render_template("tutor_member_workshop_list.html", memberworkshopbookinglist = memberworkshopbookinglist, workshopID = workshop_id, topic=topic, date=date, starttime=starttime)
 
 
 @app.route('/updateworkshopattendance', methods=['POST'])
 @logged_in
 def updateworkshopattendance():
-    #function to delete member
-    #member ID retrieved from caller form
-    #caller: memberlist.html
+    #function to update workshop attendance
+    #workshop ID retrieved from caller form
+    #caller: tutor_member_workshop_list.html
     cursor, connection = getCursor()
 
-    booking_id = int(request.form.get('bookingID'))
+    # Get list of checked checkboxes and workshop ID from the form
+    checked_values = request.form.getlist('checkbox')
     workshop_id = int(request.form.get('workshopID'))
 
-    cursor.execute("""update booking set booking_attended = 1 where booking_id = %s;""",
-            (booking_id,))
-    
-    cursor.execute("""update workshop set workshop_attendance = CASE 
-                          WHEN workshop_attendance IS NULL THEN 1 
-                          ELSE workshop_attendance + 1 
-                      END where workshop_id = %s;""",
-            (workshop_id,))
-    
-    connection.commit()
-    
+    #loop through all the checked checkboxes to get the booking ID
+    for value in checked_values:
+
+        if value:
+            booking_id = int(value)
+
+            # Update booking_attended status for the selected booking
+            cursor.execute("""update booking set booking_attended = 1 where booking_id = %s;""",
+                    (booking_id,))
+            
+            # Update workshop attendance count
+            cursor.execute("""update workshop set workshop_attendance = CASE 
+                                WHEN workshop_attendance IS NULL THEN 1 
+                                ELSE workshop_attendance + 1 
+                            END where workshop_id = %s;""",
+                    (workshop_id,))
+            
+            connection.commit()
+
+    # Flash message for successful workshop attendance update
     flash(f'Workshop attendance checked successfully', category='success')
 
     connection.close()
@@ -218,38 +249,44 @@ def updateworkshopattendance():
 @app.route('/updatelessonattendance', methods=['POST'])
 @logged_in
 def updatelessonattendance():
-    #function to delete member
+    #function to update lesson attendance
     #member ID retrieved from caller form
-    #caller: memberlist.html
+    #caller: tutor_lesson_attendance.html
     cursor, connection = getCursor()
 
+    # Get booking ID and lesson ID from the form
     booking_id = int(request.form.get('bookingID'))
     lesson_id = int(request.form.get('lessonID'))
 
+    # Update booking attendance status for the selected booking
     cursor.execute("""update booking set booking_attended = 1 where booking_id = %s;""",
             (booking_id,))
     
+    # Update lesson attendance status for the selected lesson
     cursor.execute("""update lesson set lesson_attendance = '1' where lesson_id = %s;""",
             (lesson_id,))
     
     connection.commit()
     
+    # Flash message for successful lesson attendance update
     flash(f'Lesson attendance checked successfully', category='success')
 
     connection.close()
     return redirect("/marktutorlessonattendancelist")
 
+
 # Profile route
 @app.route('/tutor/profile', methods=['GET', 'POST'])
 @logged_in
 def tutor_profile():
-
+    #function to retrieve tutor profile for editing
     tutorid = session['id']
     # Fetch the user's profile information from the database
     msg=''
     form=EditTutorProfileForm()
 
     if request.method == 'GET':
+        # Retrieve profile information for the tutor
         cursor, connection = getCursor()
         cursor.execute('SELECT * FROM staff WHERE staff_id = %s', (tutorid,) )
         profileList = cursor.fetchall()
@@ -274,7 +311,7 @@ def tutor_profile():
   
     elif request.method == 'POST':
        if form.validate_on_submit():
-
+        # Update tutor profile with new information
         tutor_id = request.form.get('tutor_id')
         title = form.title.data
         firstname = form.firstname.data
@@ -330,35 +367,38 @@ def tutor_profile():
 @app.route('/addtutorlesson')
 @logged_in
 def addtutorlesson():
+    #function to allow tutor to create lesson
     form = AddTutorLessonForm()
 
     cursor, connection = getCursor()
 
-    # Fetch titles from MySQL
+    # Fetch lesson titles and locations from MySQL
     cursor.execute("SELECT lesson_info_id, lesson_info_type FROM lesson_info;")
     titles = cursor.fetchall()
 
     cursor.execute("SELECT location_id, location_name FROM location;")
     locations = cursor.fetchall()
 
+    # Populate choices for lesson titles and locations in the form
     form.title.choices = titles
     form.location.choices = locations
 
+    # Retrieve lesson information from the database for displaying in the form
     cursor.execute("SELECT lesson_info_id, lesson_info_type, lesson_info_desc FROM lesson_info;")
     titles = cursor.fetchall()
     # Convert the titles data to a list of dictionaries
     titles_data = [{'id': title[0], 'type': title[1], 'desc': title[2]} for title in titles]
 
-    # Create form and populate choices
     cursor.close()
     connection.close()
 
     return render_template('add_tutor_lesson.html', form=form, titles_data=titles_data)
 
+
 @app.route('/inserttutorlesson', methods=['POST'])
 @logged_in
 def inserttutorlesson():
-    #function to create a lesson
+    #function to insert a new lesson 
     msg=''
     form=AddTutorLessonForm()
 
@@ -380,6 +420,7 @@ def inserttutorlesson():
     form.location.choices = locations
 
     if form.validate_on_submit():
+        # Retrieve form data
         lessontitle = form.title.data
         lessonlocation = form.location.data
         lessondate = form.lessondate.data
@@ -388,6 +429,7 @@ def inserttutorlesson():
 
         cursor, connection = getCursor()
 
+        # Check for timetable clashes with existing workshops or lessons
         cursor.execute('select * from workshop where workshop_tutor_id = %s and workshop_date = %s and workshop_time=%s',
                             ( session['id'], lessondate, lessonstarttime, ))
         workshop_clash = cursor.fetchone()
@@ -396,24 +438,28 @@ def inserttutorlesson():
                     ( session['id'], lessondate, lessonstarttime, ))
         lesson_clash = cursor.fetchone()
 
+        #section below checks if there is existing workshop or lesson that clashes with the new lesson
         if workshop_clash is None and lesson_clash is None:
+            # Insert new lesson into the database
             cursor.execute('INSERT INTO lesson (lesson_title_id, lesson_tutor_id, lesson_location, lesson_date, lesson_start_time, lesson_detail ) VALUES ( %s, %s, %s, %s, %s, %s)',
                             (lessontitle, session['id'], lessonlocation, lessondate, lessonstarttime, lessondesc, ))
             connection.commit()
 
+            # Show success message and redirect to lesson list
             flash(f'Lesson created successfully', category='success')
-            #once registration is successful, user will be routed to the login screen
+
             connection.close()
             return redirect(url_for('viewtutorlessonlist'))
         else: 
+            # Show error message if there are timetable clashes
             msg = "Failed to create lesson due to timetable clash"
             return render_template('add_tutor_lesson.html', title='Add New Lesson', form=form, msg=msg)
     elif request.method == 'POST':
-        # Form is empty... (no POST data)
+        # Form submission failed, show error message
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
     connection.close()
     return render_template('add_tutor_lesson.html', title='Add New Lesson', form=form, msg=msg)
+
 
 @app.route("/edittutorlesson/<lessonid>", methods=["GET"])
 @logged_in
@@ -432,16 +478,21 @@ def edittutorlesson(lessonid):
     cursor.execute("SELECT location_id, location_name FROM location;")
     locations = cursor.fetchall()
 
+    # Populate choices for lesson titles and locations in the form
     form.title.choices = titles
     form.location.choices = locations
 
+    # Retrieve lesson details from the database
     cursor.execute('SELECT * FROM lesson WHERE lesson_id = %s', (lessonid,) )
     lessonList = cursor.fetchall()
+
+    # Populate form fields with lesson details
     form.title.data = lessonList[0][1]
     form.location.data = lessonList[0][3]
     form.lessondate.data = lessonList[0][4]
     form.lessondesc.data = lessonList[0][7]
 
+    # Convert lesson start time to time object
     if lessonList[0][5] is None:
         start_time = time(0, 0)  # Assign a default time, e.g., midnight
     else:
@@ -455,7 +506,7 @@ def edittutorlesson(lessonid):
 @app.route('/updatetutorlesson', methods=['POST'])
 @logged_in
 def updatetutorlesson():
-    #function to edit guide
+    #function to update a tutor lessson
     msg=''
     form=EditTutorLessonForm()
 
@@ -468,11 +519,12 @@ def updatetutorlesson():
     cursor.execute("SELECT location_id, location_name FROM location;")
     locations = cursor.fetchall()
 
+    # Populate choices for lesson titles and locations in the form
     form.title.choices = titles
     form.location.choices = locations
 
     if form.validate_on_submit():
-
+        # Retrieve form data
         lesson_id = request.form.get('lesson_id')
         title = form.title.data
         location = form.location.data
@@ -480,6 +532,7 @@ def updatetutorlesson():
         lessonstarttime = form.lessonstarttime.data
         lessondesc = form.lessondesc.data
 
+        # Check for timetable clashes with existing workshops or lessons
         cursor.execute("""select * from workshop where workshop_tutor_id = %s 
                             and workshop_date = %s and workshop_time=%s""",
                             ( session['id'], lessondate, lessonstarttime, ))
@@ -490,6 +543,7 @@ def updatetutorlesson():
                     ( session['id'], lessondate, lessonstarttime, lesson_id, ))
         lesson_clash = cursor.fetchone()
 
+        # Check if there are clashes; if not, update the lesson
         if workshop_clash is None and lesson_clash is None:
 
             cursor.execute("""UPDATE lesson SET lesson_title_id=%s, lesson_location= %s, 
@@ -503,10 +557,9 @@ def updatetutorlesson():
         else: 
             msg = "Failed to edit lesson due to timetable clash"
             return render_template('edit_tutor_lesson.html', title='Edit Lesson', form=form, msg=msg)
+    # If form submission is not valid, return error message
     elif request.method == 'POST':
-        # Form is empty... (no POST data)
         msg = 'Please fill out the form!'
-    # Show registration form with message (if any)
     connection.close()
     return render_template('edit_tutor_lesson.html', title='Edit Lesson', form=form, msg=msg)
 
@@ -516,22 +569,23 @@ def updatetutorlesson():
 def deletetutorlesson():
     #function to delete tutor lesson
     #lesson ID retrieved from caller form
-    #caller: totor_lesson_list.html
+    #caller: tutor_lesson_list.html
     cursor, connection = getCursor()
 
+    # Get the lesson ID from the form data
     lesson_id = int(request.form.get('lessonID'))
 
+    # Delete the lesson from the database
     cursor.execute("""delete from lesson where lesson_id = %s;""",
             (lesson_id,))
     
     connection.commit()
     connection.close()
     
+    # Flash success message
     flash(f'Lesson deleted successfully', category='success')
 
     return redirect("/viewtutorlessonlist")
-
-
 
 
 # view workshop schedule
@@ -540,6 +594,7 @@ def deletetutorlesson():
 def tutor_view_workshop():
     cursor, connection = getCursor()
 
+    # Get the ID of the logged-in tutor from the session
     tutor_id = session.get('id')
 
     if request.method == 'POST':
@@ -553,10 +608,12 @@ def tutor_view_workshop():
                     wi.workshop_info_topic AS workshop_topic,
                     wi.workshop_info_desc AS workshop_detail,
                     w.workshop_date AS workshop_date,
-                    w.workshop_time AS workshop_time,
-                    l.location_name AS workshop_location,
+                    TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+                    l.location_name,
+                    l.location_description AS workshop_location,
                     w.workshop_cost AS workshop_cost,
-                    w.workshop_cap_limit AS workshop_cap_limit
+                    w.workshop_cap_limit AS workshop_cap_limit,
+                    l.location_map
                 FROM 
                     workshop w
                 INNER JOIN 
@@ -566,7 +623,9 @@ def tutor_view_workshop():
                 INNER JOIN 
                     location l ON w.workshop_location = l.location_id
                 WHERE 
+                    w.workshop_date >= curdate() and
                     w.workshop_tutor_id = %s
+                    order by w.workshop_date asc
             """
             cursor.execute(sql, (tutor_id,))
         workshops = cursor.fetchall()
@@ -576,7 +635,7 @@ def tutor_view_workshop():
     else:
         # if "clear filter"
         if 'clear_filter' in request.args:
-        # if view full list
+        # view full list
             sql = """
                 SELECT 
                     w.workshop_id AS workshop_id,
@@ -584,10 +643,12 @@ def tutor_view_workshop():
                     wi.workshop_info_topic AS workshop_topic,
                     wi.workshop_info_desc AS workshop_detail,
                     w.workshop_date AS workshop_date,
-                    w.workshop_time AS workshop_time,
-                    l.location_name AS workshop_location,
+                    TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+                    l.location_name,
+                    l.location_description AS workshop_location,
                     w.workshop_cost AS workshop_cost,
-                    w.workshop_cap_limit AS workshop_cap_limit
+                    w.workshop_cap_limit AS workshop_cap_limit,
+                    l.location_map
                 FROM 
                     workshop w
                 INNER JOIN 
@@ -595,7 +656,9 @@ def tutor_view_workshop():
                 INNER JOIN 
                     workshop_info wi ON w.workshop_title_id = wi.workshop_info_id
                 INNER JOIN 
-                    location l ON w.workshop_location = l.location_id;
+                    location l ON w.workshop_location = l.location_id
+                WHERE w.workshop_date >= curdate()
+                order by w.workshop_date asc;
             """
         else:
             sql = """
@@ -605,10 +668,12 @@ def tutor_view_workshop():
                     wi.workshop_info_topic AS workshop_topic,
                     wi.workshop_info_desc AS workshop_detail,
                     w.workshop_date AS workshop_date,
-                    w.workshop_time AS workshop_time,
-                    l.location_name AS workshop_location,
+                    TIME_FORMAT(w.workshop_time, '%h:%i %p') AS workshop_time,
+                    l.location_name,
+                    l.location_description AS workshop_location,
                     w.workshop_cost AS workshop_cost,
-                    w.workshop_cap_limit AS workshop_cap_limit
+                    w.workshop_cap_limit AS workshop_cap_limit,
+                    l.location_map
                 FROM 
                     workshop w
                 INNER JOIN 
@@ -616,7 +681,10 @@ def tutor_view_workshop():
                 INNER JOIN 
                     workshop_info wi ON w.workshop_title_id = wi.workshop_info_id
                 INNER JOIN 
-                    location l ON w.workshop_location = l.location_id;
+                    location l ON w.workshop_location = l.location_id
+                WHERE 
+                    w.workshop_date >= curdate()
+                order by w.workshop_date asc;
             """
         cursor.execute(sql)
         workshops = cursor.fetchall()

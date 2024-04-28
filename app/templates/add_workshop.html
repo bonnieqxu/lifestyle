@@ -173,6 +173,7 @@
     const availabilityResults = document.getElementById("availabilityResults");
 
     btn.onclick = function() {
+        event.preventDefault();
         modal.style.display = "block";
         loadTableData();
     }

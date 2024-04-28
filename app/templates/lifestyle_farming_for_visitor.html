@@ -1,0 +1,45 @@
+
+
+{% block content %}
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+
+
+<body class="bg-image" style="background-image: url('/static/background2.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-color: rgba(200, 200, 200, 0.1); height: 250vh;">
+    <nav class="navbar navbar-dark bg-primary d-flex">
+        <a class="navbar-brand" href="/">Lifestyle Landholders Club Management System</a>
+        <div class="ml-auto d-flex">
+            <a class="nav-link text-white" href="{{ url_for('authentication') }}">Log in</a>
+            <a class="nav-link text-white" href="{{ url_for('register') }}">Sign Up</a>
+        </div>
+    </nav>
+
+
+    <div class="container mt-5">
+        <h1 class="fw-light text-center mb-5">Lifestyle Farming Tips</h1>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="mb-4">
+                    Lifestyle farming, also known as hobby farming or small-scale farming, involves cultivating a small piece of land primarily for personal enjoyment rather than commercial profit. It's a popular endeavor for individuals or families who want to connect with nature, produce their own food, or simply enjoy the therapeutic aspects of working the land.
+                </p>
+                <ol>
+                    <li class="mb-3"><strong>Define Your Goals:</strong> Before starting, determine what you want to achieve with your lifestyle farm. Do you want to grow vegetables, raise animals, or both? Are you aiming for self-sufficiency, or is it more about relaxation and enjoyment?</li>
+                    <li class="mb-3"><strong>Assess Your Land:</strong> Evaluate the size and condition of your land. Consider factors such as soil quality, sunlight exposure, water availability, and local zoning regulations.</li>
+                    <li class="mb-3"><strong>Choose Your Crops or Livestock:</strong> Select crops or livestock that suit your climate, soil, and available resources.</li>
+                    <li class="mb-3"><strong>Start Small:</strong> Begin with a manageable area and gradually expand as you gain experience and confidence.</li>
+                    <li class="mb-3"><strong>Educate Yourself:</strong> Take advantage of resources such as books, online forums, workshops, and local agricultural extension offices to learn about farming practices, techniques, and local regulations.</li>
+                    <li class="mb-3"><strong>Plan Your Layout:</strong> Design your farm layout to maximize efficiency and productivity.</li>
+                    <li class="mb-3"><strong>Practice Sustainability:</strong> Embrace sustainable farming practices to minimize environmental impact and conserve natural resources.</li>
+                    <li class="mb-3"><strong>Stay Flexible:</strong> Be prepared to adapt your plans and strategies based on changing circumstances.</li>
+                    <li class="mb-3"><strong>Enjoy the Process:</strong> Remember that lifestyle farming is about the joy of working the land and producing your own food.</li>
+                    <li class="mb-3"><strong>Connect with the Community:</strong> Engage with other farmers, gardeners, and local food enthusiasts to share knowledge and experiences.</li>
+                </ol>
+                <p>
+                    By following these steps and staying committed to your goals, you can create a fulfilling lifestyle farm that brings you joy, nourishment, and a deeper connection to the land.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
